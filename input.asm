@@ -2,27 +2,13 @@
 ;
 .module INPUT
 
-; from MOS:
-; L0F99:	LD	A,0EH
-; 	OUT	(PSG_SEL),A
-; 	LD	A,E
-; 	CPL
-; 	OUT	(PSG_WR),A
-; 	RET
-;
-; this writes value in E (column select) into PSG IO reg A,
-; allowing you to read 8 active low bits to see what key in the row is pressed
-; see hardware manual, fig 3.5, section 3.8
-;
-; read key:
-;
-; L0FA2:	CALL	L0F99
-; L0FA5:	LD	A,0FH
-; 	OUT	(PSG_SEL),A
-; 	IN	A,(PSG_RD)
-; 	CPL
-; 	OR	A
-; 	RET
+
+PSG	=	00H		;PSG	00-07 	AY-3-8910
+PSG_SEL = 02H	;LATCH ADDRESS
+PSG_RD	= 02H	;READ FROM PSG
+PSG_WR	= 03H	;WRITE TO PSG
+
+; for kb description see hardware manual, fig 3.5, section 3.8
 
 prepTitleInputs:
 	ld		hl,titleinputstates+3
@@ -38,26 +24,20 @@ _prepinputs:
 -:	ld		(hl),$ff
 	add		hl,de
 	djnz	{-}
-	ret
 
-
-_rib:
-	; in		a,($37)					; cache joystick direction data
-	xor a
+	ld		a,$ff				; no joystick but I'll leave this here in case
 	ld		(lastJ),a
 	ret
 
 
+
 readtitleinput:
-	call	_rib
 	ld		hl,titleinputstates
 	call	updateinputstate ; (begin)
-	call	updateinputstate ; (redefine)
-	jp		updateinputstate ; (jsfire)
+	jp		updateinputstate ; (redefine)
 
 
 readinput:
-	call	_rib
 	ld		hl,gameinputstates
 	call	updateinputstate ; (up)
 	call	updateinputstate ; (down)
@@ -71,9 +51,18 @@ updateinputstate:
 	; hl points at first input state block,
 	; return from update function pointing to next
 	;
-	ld		c,(hl)					; get key row input port
-	; in		a,(c)					; read key row
-	xor a
+    LD		A,0EH
+	OUT		(PSG_SEL),A
+	ld		a,(hl)						; get key row selector
+	CPL
+	OUT		(PSG_WR),A
+
+	LD		A,0FH						; read key row
+	OUT		(PSG_SEL),A
+	IN		A,(PSG_RD)
+	CPL
+
+	xor 	a
 	inc		hl						; point to row mask
 	and		(hl)					; result will be non-zero if required key is down
 

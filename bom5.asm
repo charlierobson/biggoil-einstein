@@ -33,7 +33,7 @@ start:
 
 	call	seedrnd
 
-    ; ld      hl,vbl
+    ; ld      hl,vbl                    ; redirect irq routine
     ; ld      ($7006),hl
 
     ; call    clrirq                  ; release irq

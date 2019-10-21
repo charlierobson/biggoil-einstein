@@ -166,10 +166,10 @@ waitFrames:
     djnz    waitFrames
 
 waitVSync:
-    ld      hl,frames
-    ld      a,(hl)
--:  cp      (hl)
-    jr      z,{-}
+;     ld      hl,frames
+;     ld      a,(hl)
+; -:  cp      (hl)
+;     jr      z,{-}
     ret
 
 
