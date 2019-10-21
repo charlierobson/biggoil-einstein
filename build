@@ -1,0 +1,33 @@
+#!/bin/bash 
+
+function compress {
+    brass data/$1.txt data/$1.bin
+    data/lz48 -i data/$1.bin -o data/$1.binlz
+    rm data/$1.bin
+}
+
+if [ -z "$1" ]; then
+    compress title
+    compress end
+    compress lvl1
+    compress lvl2
+    compress lvl3
+    compress lvl4
+
+    cd data
+    mcs fxdecode.cs
+    mcs ayfxbanksplit.cs
+    mono ayfxbanksplit.exe biggoil-mod.afb
+    mono fxdecode.exe 3.afx
+    mono fxdecode.exe 4.afx
+    mono fxdecode.exe 7.afx
+    mono fxdecode.exe 12.afx
+    mono fxdecode.exe 13.afx
+    mono fxdecode.exe 14.afx
+    mono fxdecode.exe 17.afx
+    mono fxdecode.exe 10.afx
+    rm *.afx
+    cd ..
+fi
+
+brass -s bom5.asm bom5.com -l bom5.html
