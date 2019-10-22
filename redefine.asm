@@ -2,7 +2,7 @@
 ;
 .module REDEF
 
-	.align  128
+	.align  64
 _keychar:
 	.db	    7,6,8+0,8+7,3,2,1,0
 	.asc	"IOP?_?|0"

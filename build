@@ -30,4 +30,4 @@ if [ -z "$1" ]; then
     cd ..
 fi
 
-brass -s bom5.asm bom5.com -l bom5.html
+brass -s bote.asm bote.com -l bote.html
