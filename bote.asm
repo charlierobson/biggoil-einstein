@@ -68,9 +68,9 @@ clrirq:
 #include "decrunch.asm"
 #include "input.asm"
 #include "vdp.asm"
+#include "ayfxplayAY.asm"
+#include "sfx.asm"
 #include "stcplay.asm"
-#include "ayfxcustom.asm"
-#include "ayfxplaySN.asm"
 
 #include "font.asm"
 

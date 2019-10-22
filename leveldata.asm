@@ -170,3 +170,29 @@ _nextrow:
 	djnz	_nextrow
 
 	ret
+
+
+; self modifies
+;
+addv:
+	ld		(hl),e
+	inc		hl
+	ld		(hl),d
+	inc		hl
+adval0 = $+1
+	ld		(hl),0
+	inc		hl
+adval1 = $+1
+	ld		(hl),0
+	inc		hl
+animnum = $+1
+	ld		(hl),0
+	inc		hl
+	inc		hl
+	inc		hl
+	inc		hl
+
+	ld		a,(entrancecount)
+	inc		a
+	ld		(entrancecount),a
+	ret

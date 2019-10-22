@@ -35,6 +35,12 @@ title:
 end:
 	.incbin data/end.binlz
 
+soundbank:
+	.incbin data/biggoil.afb
+
+titlestc:
+	.incbin data/yerz.stc
+
 
 	.align 16
 reversetab:
@@ -157,42 +163,10 @@ newtonep4=newtone+10
 newtonelen = $-newtone
 	.byte   $80,$09,$3f,$82,$03,$20,$85,$0D,$12,$88,$0B,$0f,$3f
 
-afxChDesc:
-	.db		0,0,0,0,CHAN1ID
-	.db		0,0,0,0,CHAN2ID
-	.db		0,0,0,0,CHAN3ID
-
 drone1:
     .byte       %10101100
     .byte       $0f,$3f
 
-; =-=-=-=-= self-modifying codez =-=-=-=-=
-
-
-; called from initentrances in leveldata
-;
-addv:
-	ld		(hl),e
-	inc		hl
-	ld		(hl),d
-	inc		hl
-adval0 = $+1
-	ld		(hl),0
-	inc		hl
-adval1 = $+1
-	ld		(hl),0
-	inc		hl
-animnum = $+1
-	ld		(hl),0
-	inc		hl
-	inc		hl
-	inc		hl
-	inc		hl
-
-	ld		a,(entrancecount)
-	inc		a
-	ld		(entrancecount),a
-	ret
 
 
 .if $ >= offscreenmap

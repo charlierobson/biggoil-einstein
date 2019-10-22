@@ -14,7 +14,7 @@ titlescn:
 	call	displayscoreonts
 	call	displayhionts
 
-;    call    AYFX.INIT
+	call	init_stc
 
 _titleloop:
 	call	framesync

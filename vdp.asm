@@ -162,6 +162,8 @@ waitVSync:
     ld      a,(frames)
     inc     a
     ld      (frames),a
+irqsnd = $+1
+	call	$+3
     ret
 
 cls:

@@ -64,7 +64,7 @@ redefinekeys:
 	ld		de,$0802
 	call	textOut
 
-	ld		hl,smfx3
+	ld		a,3
 	call	AYFX.PLAY
 
 -:	call	_getcolbit			; wait for key release
@@ -119,7 +119,7 @@ _redefloop:
     ld      a,c                     ; store the bit number for the key
     ld      (keycol),a
 
-	ld		hl,smfx4
+	ld		a,4
 	call	AYFX.PLAY
 
     call    _showkey

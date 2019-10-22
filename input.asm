@@ -2,12 +2,6 @@
 ;
 .module INPUT
 
-
-PSG	=	00H		;PSG	00-07 	AY-3-8910
-PSG_SEL = 02H	;LATCH ADDRESS
-PSG_RD	= 02H	;READ FROM PSG
-PSG_WR	= 03H	;WRITE TO PSG
-
 ; for kb description see hardware manual, fig 3.5, section 3.8
 
 prepTitleInputs:

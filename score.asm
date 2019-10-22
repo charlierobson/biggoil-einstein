@@ -33,7 +33,7 @@ _addbonus:
 	ld		(lives),a
 	call	displaymen
 
-	ld		hl,smfx10
+	ld		a,10
 	call	AYFX.PLAYON3
 
 displayscore:
