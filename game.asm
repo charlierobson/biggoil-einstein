@@ -18,6 +18,8 @@ game:
 
 	call	displayscoreline
 
+	call	initsfx
+
 newlevel:
 	call	displaylevel
 	call	createmap
@@ -117,6 +119,7 @@ _playon:
 	call	showwinch				; so it's about a speed and a half
 	ld		a,(frames)
 	and		3						; prepare the z flag
+	ld		a,18					; set up sound number in case it's time
 	call	z,generatetone
 	jp		mainloop
 

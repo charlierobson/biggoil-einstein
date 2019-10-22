@@ -2,6 +2,21 @@
 ;
 .module SFX
 
+
+newtone:
+newtonep1=newtone+1
+newtonep2=newtone+4
+newtonep3=newtone+7
+newtonep4=newtone+10
+	.byte   $80,$09,$3f,$82,$03,$20,$85,$0D,$12,$88,$0B,$0f,$3f
+newtonelen = $-newtone
+	.byte   $80,$09,$3f,$82,$03,$20,$85,$0D,$12,$88,$0B,$0f,$3f
+
+drone1:
+    .byte       %10101100
+    .byte       $0f,$3f
+
+
 initsfx:
 	call	framesync
 	call	mute_ay

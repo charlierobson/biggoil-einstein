@@ -4,6 +4,41 @@
 
 ; for kb description see hardware manual, fig 3.5, section 3.8
 
+
+; input state data:
+;
+; key row select
+; key mask
+; joystick bit mask from port $37, or 0 if no js
+; trigger impulse
+
+titleinputstates:
+	.byte	$01,%01000000,%00000000,0		; startgame	(SP)
+	.byte	$20,%00001000,%00000000,0		; redefine	(R)
+	.byte	$00,%00000000,%00000000,0		; jsbegin	(--)
+
+gameinputstates:
+	.byte	$01,%01000000,%00000000,0		; fire	    (SP)
+	.byte	$20,%01000000,%00000010,0		; up	    (Q)
+	.byte	$40,%01000000,%00001000,0		; down	    (A)
+	.byte	$08,%00000001,%00000100,0		; left	    (,)
+	.byte	$08,%00000010,%00000001,0		; right	    (.)
+	.byte	$00,%00000000,%00000000,0		; jsfire    (--)
+
+; calculate actual input impulse addresses
+;
+begin	= titleinputstates + 3
+redef	= titleinputstates + 7
+jsbegin	= titleinputstates + 11
+
+fire	= gameinputstates + 3
+up		= gameinputstates + 7
+down	= gameinputstates + 11
+left	= gameinputstates + 15
+right	= gameinputstates + 19
+jsfire	= gameinputstates + 23
+
+
 prepTitleInputs:
 	ld		hl,titleinputstates+3
 	jr		_prepinputs
@@ -35,9 +70,9 @@ readinput:
 	ld		hl,gameinputstates
 	call	updateinputstate ; (up)
 	call	updateinputstate ; (down)
-	call	updateinputstate ;  etc.
-	call	updateinputstate ;
-	call	updateinputstate ;
+	call	updateinputstate ; (left)
+	call	updateinputstate ; (right)
+	call	updateinputstate ; (fire)
 
 	; fall into here for last input
 

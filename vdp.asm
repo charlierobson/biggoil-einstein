@@ -151,21 +151,6 @@ writeVDP:
     ret
 
 
-waitFrames:
-    call    waitVSync
-    djnz    waitFrames
-
-waitVSync:
-    in      a,(VDP_STAT)        ; poll VDP's status register for the vblank bit (7). reading it clears it.
-    rla
-    jr      nc,waitVSync
-    ld      a,(frames)
-    inc     a
-    ld      (frames),a
-irqsnd = $+1
-	call	$+3
-    ret
-
 cls:
     di
     call    displayOff
@@ -258,4 +243,23 @@ setborder:
 	ld		a,$87
 	out		(VDP_REG),a
 
+    ret
+
+
+
+waitFrames:
+    call    waitVSync
+    djnz    waitFrames
+
+waitVSync:
+    in      a,(VDP_STAT)        ; poll VDP's status register for the vblank bit (7). reading it clears it.
+    rla
+    jr      nc,waitVSync
+
+    ld      a,(frames)
+    inc     a
+    ld      (frames),a
+
+irqsnd = $+1
+    call    $+3
     ret

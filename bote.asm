@@ -4,44 +4,23 @@
 
 
 start:
-    di
 	ld		sp,$7fff
 
-    ; ld      a,$01                   ; disable timer interrupts
-    ; out     ($01),a
+    ld      hl,$7000                ; zero out memory
+    ld      de,$7001
+    ld      (hl),l
+    ld      bc,$ff0
+    ldir
 
-    call    initmem
     call    initVDP
-
 	call	seedrnd
-
-    ; ld      hl,vbl                    ; redirect irq routine
-    ; ld      ($7006),hl
-
     call    clrirq                  ; simply a reti instruction, used to satisfy z80 family chips
-    ei
 
 -:	call	titlescn
 	call	game
 	call	gameoverscn
 	jr		{-}
 
-
-
-
-vdpIRQ:
-    ; exx
-    ; push    af
-    ; ld      a,(frames)
-    ; inc     a
-    ; ld      (frames),a
-
-    ; call    AYFX.FRAME
-
-    ; in      a,(VDP_STAT)
-    ; pop     af
-    ; exx
-    ; ei
 
 clrirq:
     reti
