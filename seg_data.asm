@@ -207,8 +207,8 @@ seg_data_end
 seg_bss:
 .varloc seg_bss_target,seg_bss_size
 	.var	byte, lastJ
-	.var	byte, keybit
-	.var	byte, keyport
+	.var	byte, keycol
+	.var	byte, keyrow
 	.var	word, keyaddress
 	.var	byte, tcd
 	.var	byte, tt

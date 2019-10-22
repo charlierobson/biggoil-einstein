@@ -2,10 +2,10 @@
 BiggOil for Tatung Einstein
 
 ### TODO
+* ~~non-matrix keys~~
+* ~~redefinition module~~
 
-* same as m5 version..!
-
-* joystick button inputs
+* joystick
 * sfx
 * music
 * refactor display code, remove NLs
