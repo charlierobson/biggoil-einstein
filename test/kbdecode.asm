@@ -6,10 +6,19 @@ PSG_SEL = 02H	;LATCH ADDRESS
 PSG_RD	= 02H	;READ FROM PSG
 PSG_WR	= 03H	;WRITE TO PSG
 
+VDP_DATA    .equ $08    ; read/write
+VDP_REG     .equ $09    ; write
+VDP_STAT    .equ $09    ; read
+
+
     ld      a,12    ; cls
 	.db     $cf,$9E
 
--:  ld      e,$80 ; e = row select bit
+-:  
+
+
+
+    ld      e,$80 ; e = row select bit
     call    row
     srl     e
     call    row

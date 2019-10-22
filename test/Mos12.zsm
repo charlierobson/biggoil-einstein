@@ -1,0 +1,4477 @@
+;***********************************************************************
+;*******               DEFAULT MOS 1.2 LOCATIONS                ********
+;*******            R.H0HNE	         02-DEC-86              ********
+;******* DEC-2006   MINOR CORRECTIONS                           ********
+;***********************************************************************
+
+#define DW .dw
+#define DB .db
+#define EQU .equ
+#define ORG .org
+
+#define DEFB .db
+#define DEFW .dw
+
+
+;HARDWARE DEPENDANT ADDRESSES
+SFTRST	EQU	00H		; RESET PORT,FDC/PSG
+;
+PSG	EQU	00H		;PSG	00-07 	AY-3-8910
+PSG_SEL	EQU 02H	;LATCH ADDRESS
+PSG_RD	EQU 02H	;READ FROM PSG
+PSG_WR	EQU 03H	;WRITE TO PSG
+;
+VDP	EQU	08H		;VDP	08-0F	TMS9129
+VDP_VRAM	EQU 08H	; VRAM READ/WRITE
+VDP_REG	EQU 09H	;
+VDP_STAT EQU 09H	;READ VDP STATUS
+;
+PCI	EQU	10H		;PCI	10-17	8251
+;
+FDC	EQU	18H		;FDC	18-1F	FD1770
+FDC_CMD	EQU	18H
+FDC_STATUS	EQU	18H
+FDC_TRACK	EQU	19H
+FDC_SECTOR	EQU	1AH
+FDC_DATA	EQU	1BH
+;
+KBDMSK	EQU	20H		;KEYBOARD INTERRUPT MASK
+ADCMSK	EQU	21H		;ADC INTERRUPT MASK
+ALPHA	EQU	22H		;TOGGLES ALPHA LED
+DRVSEL	EQU	23H		;DRIVE SELECT
+RAMROM	EQU	24H            	;SELECT RAM/ROM
+FIREMSK	EQU	25H		;FIRE INTERRUPT MASK
+CTC	EQU	28H		;CTC	28-2F	Z80A CTC
+PIA	EQU	30H		;PIA	30-37	Z80A PIA
+ADC_PT	EQU	38H		;ADC	38-3F	ACD0844
+
+;INTERRUPT VECTORS
+ICTC0   EQU     0FB00H          ;CTC0
+ICTC1   EQU     0FB02H          ;CTC1
+ICTC2   EQU     0FB04H          ;CTC2
+ICTC3   EQU     0FB06H          ;CTC3  REAL TIME CLOCK
+IKBD    EQU     0FB08H          ;KEYBOARD
+IADC    EQU     0FB0AH          ;ANALOGUE TO DIGITAL CONVERTER
+IFIRE   EQU     0FB0CH          ;FIRE BUTTON
+IUSER   EQU     0FB0EH          ;EXTERNAL INTERRUPT SUPPLIED BY USER
+IPRT    EQU     0FB10H          ;PIA_A  PRINTER
+IPIA    EQU     0FB12H          ;PIA_B
+	
+BRKVCT  EQU     0FB30H          ;BREAK VECTOR
+CLDVCT  EQU     0FB32H	        ;COLD START VECTOR
+WRMVCT  EQU     0FB34H          ;WARM START VECTOR
+
+VMODE   EQU     0FB36H          ;VDP MODE - DEPENDANT ON SCREEN SIZE
+TCOLR   EQU     0FB38H          ;TEXT COLOUR 	- <0:3>BACK,<4:7>FOREGROUND
+GCOLR   EQU     0FB39H          ;GRAPHICS COLOUR 	- DITTO
+
+MOSITP  EQU     0FB3AH          ;LOCATION OF MOS VECTORS
+MOSLOW  EQU     0FB3CH          ;MOS COMMAND OUT OF RANGE - TOO LOW
+KFLAG   EQU     0FB3EH          ;KEY FLAGS
+		;<0>				<4>
+		;<1>				<5>GRAPH,L
+		;<2>				<6>CONTROL,L
+		;<3>				<7>SHIFT,L
+CUSCDE  EQU     0FB3FH		;CURSOR CODE
+PROMPT  EQU     0FB40H          ;PROMPT CODE
+BLINK   EQU     0FB41H          ;BLINK RATE
+KDEL    EQU     0FB42H          ;KEYBOARD REPEAT DELAY
+KSCAN   EQU     0FB43H          ;KEYBOARD SCAN RATE
+SSIZE   EQU     0FB44H          ;SECTOR SIZE IN 256 BYTE BLOCKS
+PCFLAGS EQU     0FB45H          ;HARDWARE FLAGS
+                ;<0> CURSOR ON                <4> CHANGE LINE/COL
+                ;<1> PRINTER ON               <5>
+                ;<2> 80 COLUMN                <6>
+                ;<3> CHANGE CURSOR POSITION   <7> REVERSE VIDEO
+LKEY    EQU     0FB46H          ;LAST KEY PRESSED
+CCODE   EQU     0FB47H          ;CHARACTER CODE AT CURSOR
+KEY     EQU     0FB48H		;KEY PRESSED
+PARAS	EQU     0FB49H		;NUMBER OF PARAMETERS TO GET ?
+
+;SCREEN PARAMETERS
+CUSCOL  EQU     0FB4AH		;SCREEN COLUMN
+CUSROW  EQU     0FB4BH		;SCREEN ROW
+LENGTH 	EQU     0FB4CH		;SREEN LENGTH IN 32/40 MODE
+LFB4D	EQU     0FB4DH		; ?????????
+LFB4E	EQU     0FB4EH
+WIDTH   EQU     0FB4FH		;SCREEN WIDTH
+
+HSTDSC  EQU     0FB50H		;CURRENT DRIVE
+HSTTRK  EQU     0FB51H		;CURRENT TRACK
+HSTSEC  EQU     0FB52H		;CURRENT SECTOR
+HSTDMA	EQU     0FB53H		;DRIVE BUFFER ADDRESS
+RWFLAG  EQU     0FB55H		;READ/WRITE STATUS
+DERROR  EQU     0FB56H		;DRIVE ERROR CODE
+DTRYS   EQU     0FB57H		;NUMBER OF RETRYS
+HEAD0	EQU     0FB58H		;HEAD POSITION 	- DRIVE 0
+HEAD1  	EQU     0FB59H		;             	- DRIVE 1
+HEAD2  	EQU     0FB5AH		;             	- DRIVE 2
+HEAD3  	EQU     0FB5BH		;             	- DRIVE 3
+
+BPCODE	EQU     0FB5CH          ;CODE AT BREAKPOINT
+BPADD	EQU     0FB5DH          ;BREAKPOINT ADDRESS
+VSTAT   EQU     0FB5FH          ;VDP STATUS
+
+;REGISTER STORAGE AREA FOR PROGRAM WHEN MCAL ENTERED
+USERI   EQU     0FB60H          ;INTERRUPT VECTOR
+USERIX  EQU     0FB61H		;IX
+USERIY  EQU     0FB63H		;IY
+USERSP  EQU     0FB65H		;SP
+MOSAF   EQU     0FB67H		;AF'
+MOSBC   EQU     0FB69H		;BC'
+MOSDE   EQU     0FB6BH		;DE'
+MOSHL   EQU     0FB6DH		;HL'
+USERAF  EQU     0FB6FH		;AF
+USERBC  EQU     0FB71H          ;BC
+USERDE  EQU     0FB73H          ;DE
+USERHL  EQU     0FB75H          ;HL
+USERPC  EQU     0FB77H          ;PC
+TEMPHL  EQU     0FB79H          ;TEMPORARY STORAGE OF HL
+TEMPPC  EQU     0FB7BH		;TEMPORARY STORAGE OF PC
+
+;DRIVE INFORMATION (CPM)
+CPMDRV	EQU     0FB7DH          ;DRIVE NUMBER
+CPMTRK	EQU     0FB7EH          ;DRIVE TRACK
+CPMSEC	EQU     0FB7FH    	;DRIVE SECTOR 0-3
+CPMADD	EQU     0FB80H		;DESTINATIOM ADDRESS
+; 10 LOCATIONS USED BY DRIVE (CPM)
+LFB82	EQU	0FB82H
+LFB83	EQU	0FB83H
+LFB85	EQU	0FB85H
+LFB86	EQU	0FB86H
+LFB87	EQU	0FB87H
+LFB88	EQU	0FB88H
+LFB89	EQU	0FB89H
+LFB8A	EQU	0FB8AH
+LFB8B	EQU	0FB8BH
+
+RTCH    EQU     0FB8CH          ;RTC	- HOURS
+RTCM    EQU     0FB8EH          ;       - MINUTES
+RTCS    EQU     0FB90H		;       - SECONDS
+
+IFLAG   EQU     0FB92H          ;INTERRUPT FLAG
+FKEY    EQU     0FB93H          ;FUNCTION KEY
+FVRAM   EQU     0FB94H          ;FUNCTION KEY POINTER IN VIDEO RAM
+
+;GRAPHIC LOCATIONS
+X1      EQU     0FB96H          ;DESTINATION ADDRESS OF DRAW TO X
+Y1      EQU     0FB98H          ;DESTINATION ADDRESS OF DRAW TO Y
+ORGX    EQU     0FB9AH          ;X ORIGIN
+ORGY    EQU     0FB9CH          ;Y ORIGIN
+POLYX   EQU     0FB9EH          ;POLYGON CENTER
+POLYY   EQU     0FBA0H		;POLYGON CENTER
+RADX    EQU     0FBA2H		;ELLIPSE RADIUS
+RADY    EQU     0FBA4H          ;ELLIPSE RADIUS
+CINC   	EQU     0FBA6H          ;NUMBER OF POLYGON SIDES
+DOTON   EQU     0FBA8H
+DOTOFF  EQU     0FBA9H
+DOTON2  EQU     0FBAAH
+DOTOF2  EQU     0FBABH
+DOTCNT  EQU     0FBACH
+FILL    EQU     0FBADH        	;FILL MODE 0FBA=BACK,FF=FOREGROUND
+FILLSP  EQU     0FBAEH          ;FILL SP
+
+;DRIVE DESCRIPTIONS
+DFLAG   EQU     0FBB0H          ;DRIVE STEPPING RATE
+DTYPE   EQU     0FBB1H          ;DRIVE TYPE <0:3> DS/SS  <4:7> 80/40
+KEYBUF	EQU	0FBB2H		;40 BYTES RESERVED FOR KEYBOARD INPUT
+				;FIRST CHARACTER IS PROMPT
+VDPBUF	EQU	0FBE0H		;32 BYTES USED BY VRAM CHARACTER GENERATION
+				;CORRESPONDS TO 4 BYTES CHARACTERS WORTH
+
+CR	EQU	0DH
+LF	EQU	0AH
+ZROM	EQU	4004H
+ZRDMEM	EQU	0FB14H
+LFB17	EQU	0FB17H
+ZRCPYU	EQU	0FB1AH
+ZRCPYD	EQU	0FB21H
+RAMSEC	EQU	0FE00H		;DEFAULT AREA FOR 512 BYTE SECTOR
+LFBB3	EQU	0FBB3H
+LFBB5	EQU	0FBB5H
+LFBB8	EQU	0FBB8H
+LFE08	EQU	0FE08H
+LFCFF   EQU	0FCFFH
+
+;***********************************************************************
+;START OF ROM
+;***********************************************************************
+        ORG     0000H
+RST0:   LD	HL,08000H
+        ORG     0003H		;FRIG
+        LD	DE,08001H
+        JR	MTEST1		;JUMP AROUND RESET CODES
+;***********************************************************************
+RST8:   JP	L0FC2          
+;***********************************************************************
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+;***********************************************************************
+;OUTPUT CHARACTER
+;INPUT REGISTER		A	= CHARACTER TO OUTPUT
+RST10:  JP	ZOUTC          ;OUTPUT CHARACTER DEFINED BY 'A'
+;***********************************************************************
+        NOP
+        NOP
+        NOP
+        NOP
+        NOP
+;***********************************************************************
+;PRINT MESSAGE STARTING AFTER RST 18H COMMAND
+RST18:  EX	(SP),HL         ;SET HL TO ADDRESS AFTER CALL
+PRTMEM:	CALL	L0F3F           ;PRINT MESSAGE
+L001C:	JR	Z,PRTMEM	;LOOP IF TOP BIT NOT SET
+        EX	(SP),HL         ;PUT ADDRESS AFTER MESSAGE ONTO STACK
+        RET
+;***********************************************************************
+;MCAL &C1 SET VRAM ADDRESS FOR A WRITE OPERATION
+;INPUT REGISTER		BC	= VRAM ADDRESS
+RST20:
+ZSREG:  PUSH	AF              ;SET UP VRAM ADDRESS AND SET UP FOR WRITE
+        LD	A,C
+        OUT	(VDP+1),A
+        LD	A,B
+        JP	L0C98
+;***********************************************************************
+;READ FROM VRAM
+;INPUT REGISTER		BC	= VRAM ADDRESS
+;OUTPUT REGISTER	A	= BYTE AT ABOVE LOCATION
+RST28:  CALL    L0C8D           ;SET UP VRAM ADDRESS AND READ DATA
+        IN	A,(VDP)
+        RET
+        NOP
+        NOP
+;***********************************************************************
+;MCAL &C3 WRITE TO VRAM
+;INPUT REGISTER		BC= VRAM ADDRESS
+;			A	= BYTE TO WRITE
+ZVROUT: RST	20H             ;SET UP VRAM ADDRESS AND WRITE 'A'
+        OUT	(VDP),A
+        RET
+;***********************************************************************
+;DRIVE SELECT CODES
+L0034:	DEFB	01H,02H,04H,08H
+;***********************************************************************
+RST38:  NOP
+        NOP
+        JP	L0204
+;***********************************************************************
+	DEFB	62H,0,0		;L003D:	WHY IS THIS HERE
+;***********************************************************************
+MTEST1:	LD	BC,07FFFH
+	LD	(HL),C
+        LDIR                    ;FILL TOP HALF OF RAM WITH &FF
+        LD	HL,08000H
+        LD	B,H
+        LDIR                    ;FILL LOWER HALF OF RAM WITH &FF
+        LD	HL,ICTC0
+        LD	DE,ICTC0+1
+        INC	(HL)
+        LD	BC,04FFH
+        LDIR                   	;CLEAR AREA USED BY MOS (&FB00 TO &FFFF)
+        LD	HL,L0FF0	;SET UP INTERUPT ROUTINES
+        LD	DE,ICTC0
+        LD	C,046H	
+        LDIR                    ;COPY &FF0/&1035 TO &FB00/FB45
+        LD	HL,L1036
+        LD	DE,0
+        LD	C,11
+        LDIR                    ;COPY &1036/&1040 TO &0/&B
+        LD	DE,0FC09H
+        LD	C,084H
+        LDIR                    ;COPY &1041/&10C4 TO &FC09/&FC8B
+        LD	HL,RTCH         ;RESET RTC TO ZERO
+        LD	B,6
+RSTRTC:	LD	(HL),30H
+        INC	HL
+        DJNZ	RSTRTC		;RTC SET TO ZERO ?
+        LD	SP,LFCFF
+        LD	A,0FBH          ;SET UP INTERUPT POINTER
+        LD	I,A
+        LD	(USERI),A        ;SAVE INTERUPT POINTER
+        LD	(USERSP),SP      ;SAVE STACK POINTER
+        LD	A,1          	;SET FOR 12MS STEPPING RATE
+        LD	(DFLAG),A
+L0090:	IM 2                     ;ALLOW MODE 2 INTERRUPTS ONLY
+        XOR	A               ;SET UP CTC(0) INTERUPT VECTOR
+        OUT	(CTC),A
+        DEFB	0CFH,0BCH	;MCAL ZZTIME     1 SECOND INTERUPTS @ &FB00
+        LD	A,0CEH          ;SET UP 8251 MODE INSTRUCTION
+        OUT	(PCI+1),A
+        LD	A,027H          ;SET UP 8251 COMMAND INSTRUCTION
+        OUT	(PCI+1),A
+        LD	HL,0008H       	;SET UP FOR 9600 BAUD
+        LD	D,H
+        LD	E,H
+        DEFB	0CFH,081H	;MCAL BAUD
+        LD	A,010H          ;SET UP PIA(A) INTERUPT VECTOR
+        OUT	(PIA+1),A
+        LD	A,012H          ;SET UP PIA(B) INTERUPT VECTOR
+        OUT	(PIA+3),A
+        LD	A,0FH          	;SELECT PIA(A) AS OUTPUTS
+        OUT	(PIA+1),A
+        LD	A,087H          ;ENABLE PIA(A) INTERUPTS TO OCCUR
+        OUT	(PIA+1),A
+        LD	A,8          	;8 VDP REGISTERS
+        LD	B,080H          ;OFFSET FOR FIRST REGISTER
+	LD	HL,L0FE8       	;POINTER FOR VDP PARAMETERS
+SETVDP: LD	C,(HL)		;GET VDP REGISTER VALUE
+        CALL	L0C8D           ;SET VDP REGISTER
+        INC	HL
+        INC	B
+        DEC	A
+        JR	NZ,SETVDP	;FINISHED SETTING UP VDP ?
+        LD	BC,3B80H	;CLEAR VRAM FOR FUNCTION KEYS TO &80
+        RST	20H
+        LD	BC,0080H
+        LD	E,C
+        CALL    L0CA6
+        DEFB	0CFH,0BEH	;MCAL ZSYSRS
+        DEFB	0CFH,0D3H	;MCAL ZINIT80
+        DEFB	0CFH,0BFH	;MCAL ZLOGO
+L00D7:	EI                      ;ENABLE INTERUPTS
+        LD	A,(4000H)	;CHECK IF SECOND PROM PRESENT
+        OR	A
+        CALL	Z,4001H		;BOOT FROM PROM IF FIRST BYTE ZERO
+        LD	A,01H          	;SELECT DRIVE 0
+        OUT	(DRVSEL),A
+        DEFB	0CFH,0AFH	;MCAL ZHMDSC
+        JP	Z,FBOOT         ;IF DRIVE READY THEN BOOT FROM DRIVE
+        DEFB	0CFH,0BDH	;MCAL ZPRM
+L00EA:	RST	18H             ;PRINT BOOT UP MESSAGE
+        DEFB	CR,LF,'       Insert disc in drive 0 and'
+        DEFB	CR,LF,'        press Ctrl-BREAK to load'
+        DEFB	CR,LF,LF,'TATUNG/Xtal MOS 1.2'
+        .db '        (C) 1983 198','4'+$80
+	JR	MBOOT		;BOOT UP MOS
+;***********************************************************************
+;MCAL &9A RE-ENTRY POINT TO MOS
+ZINIT:	RST	18H
+        DEFB	CR,LF
+		.db	'MOS 1.','2'+$80
+;***********************************************************************
+MBOOT:	RST	18H
+        DEFB	CR,LF,'Ready',CR,LF+80H
+;***********************************************************************
+MINIT:	LD	SP,LFCFF       ;SET UP STACK POINTER
+        EI                      ;ENABLE INTERUPTS
+        DEFB	0CFH,0A7H	;MCAL ZCRLFZ
+L0177:	LD	A,(PROMPT)      
+        RST	10H		;PRINT MOS PROMPT - CHEVRON
+        LD	DE,LFBB8	;SET 'DE' TO START OF MOS TEXT LINE
+        DEFB	0CFH,09DH	;MCAL ZGETLN
+        LD	A,(DE)
+        OR	A
+        JR	Z,L0177         ;ENSURE THAT JUST 'ENTER' IS NOT PRESSED
+        CALL	L01DC           ;RESET TOP BITS IF 80 COLUMN PRESENT
+        INC	DE
+        AND	05FH            ;LIMIT TOP OF COMMAND
+        SUB	'A'		;SET TO BOTTOM COMMAND
+        JR	C,CALERR	;JUMP IF COMMAND OUT OF RANGE
+	LD	HL,MCAL       	;SET 'HL' TO START OF MCAL LOOK UP TABLE
+        ADD	A,A             ;2 BYTES PER COMMAND
+        LD	C,A             ;SET UP 'BC' FOR COMMAND OFFSET
+        LD	B,0
+        ADD	HL,BC           ;SET UP 'HL' FOR COMMAND ADDRESS
+        LD	B,(HL)
+        INC	HL
+        LD	H,(HL)
+        LD	L,B
+        LD	BC,HEX
+        SBC	HL,BC		;CHECK FOR HEX COMMAND
+        ADD	HL,BC
+        JR	NZ,L01A7	;JUMP IF NOT HEX COMMAND
+        LD	BC,L01F2       	;SET UP COMMAND RETURN ADDRESS
+        PUSH	BC
+        JP	(HL)            ;JUMP TO HEX ROUTINE
+;***********************************************************************
+;GET ANY PARAMETERS AFTER BASIC MOS COMMAND
+L01A7:	PUSH	HL
+        EXX                     ;CLEAR HL',DE',BC'
+        LD	HL,0000H
+        LD	D,H
+        LD	E,L
+        LD	B,H
+        LD	C,L
+        EXX
+        LD	A,3          	;3 HEX NUMBERS TO GET
+L01B3:  LD	(PARAS),A
+        DEFB	0CFH,0B0H	;MCAL ZIGBLK
+        JR	Z,L01D4
+        DEFB	0CFH,0ACH	;MCAL ZFC4HX
+        PUSH	HL
+        EXX
+        LD	A,(PARAS)
+        CP	3
+        JR	NZ,L01C6  
+        POP	HL
+L01C6:	CP	2
+        JR	NZ,L01CB
+        POP	DE
+L01CB:	CP	1
+        JR	NZ,L01D0
+        POP	BC
+L01D0:	EXX
+        DEC	A
+        JR	NZ,L01B3        ;GOT 3 RD HEX NUMBER ?
+L01D4:	OR	A
+        LD	HL,L01F2	;SET COMMAND RETURN ADDRESS
+        EX	(SP),HL
+        PUSH	HL		;SET UP ADDRESS FOR COMMAND
+        EXX
+        RET
+;***********************************************************************
+L01DC:	PUSH	AF
+        LD	HL,PCFLAGS
+        BIT	2,(HL)
+	JR	Z,L01F0         ;JUMP IF NOT IN 80 COLUMN MODE
+        LD	B,80		;RESET LINES WORTH OF TOP BITS
+        LD	HL,LFBB8
+L01E9:	LD	A,7FH
+        AND	(HL)
+        LD	(HL),A
+        INC	HL
+        DJNZ	L01E9
+L01F0:	POP	AF
+        RET
+;***********************************************************************
+;MOS RETURN TRAP
+L01F2:	JP	NC,MINIT        ;JUMP IF NO ERROR IN COMMAND
+CALERR:	RST	18H
+        .db	' Erro','r'+$80
+L01FC:	RST	18H
+        DEFB	'!',07H,CR,LF+80H
+        JP	MINIT
+;***********************************************************************
+;CONTROL RETURNED TO THIS POINT FOR RST 08'S
+L0204:	LD	(USERSP),SP	;SAVE PROGRAM POINTER
+        DI
+        LD	SP,USERPC	;SAVE REGISTERS IN REG SAVE AREA
+        PUSH	HL
+        PUSH	DE
+        PUSH	BC
+        PUSH	AF
+        LD	HL,(USERSP)
+        DEFB	0CFH,0B1H	;MCAL ZRDMEM
+        LD	E,A
+        INC	HL
+        DEFB	0CFH,0B1H	;MCAL ZRDMEM
+        LD	D,A
+        INC	HL
+        LD	(USERSP),HL
+        DEC	DE
+        LD	(USERPC),DE
+        EXX
+        EX	AF,AF'
+        PUSH	HL
+        PUSH	DE
+        PUSH	BC
+        PUSH	AF
+        LD	SP,USERSP
+        PUSH	IY
+        PUSH	IX
+        LD	HL,(VSTAT)
+        LD	A,I
+        PUSH	AF
+        LD	A,L
+        LD	(VSTAT),A
+        LD	SP,LFCFF
+        LD	HL,(BPADD)	;CHECK BRAKPOINT ADDRESS
+        LD	A,H
+        OR	L
+	LD	A,(BPCODE)
+        JR	Z,L0248		;JUMP IF BREAKPOINT NOT SET
+        LD	(HL),A		;RESTORE BRAKPOINT CODE
+L0248:	LD	HL,0000H
+        DEFB	0CFH,099H	;MCAL REGSTR
+        JP	MINIT		;GET NEXT COMMAND
+;***********************************************************************
+;CONTROL RETURNED TO THIS POINT IF BOOTING FROM DISC
+FBOOT:	LD	SP,LFCFF
+        XOR	A		;READ FIRST SECTOR OF DRIVE 0
+        LD	H,A
+        LD	L,A
+        LD	(HSTDSC),A       ;SET UP FOR DRIVE 0
+        LD	(HSTTRK),HL      ;SET UP FOR TRACK 0, SECTOR 0
+        LD	HL,RAMSEC       ;SET UP DESTINATION ADDRESS
+        LD	(HSTDMA),HL
+        PUSH	HL
+        DEFB	0CFH,0A2H	;MCAL ZRSECT
+        POP	HL              ;SET 'HL' TO ADDRESS OF FIRST BYTE
+        LD	E,(HL)          ;SET 'DE' TO START ADDRESS , BYTES 1,2
+        INC	HL
+        LD	D,(HL)
+        INC	HL
+        PUSH	DE
+        LD	E,(HL)          ;SET 'DE' TO END ADDRESS , BYTES 3,4
+        INC	HL
+        LD	D,(HL)
+        INC	HL
+        LD	C,(HL)          ;SET 'BC' TO ENTRY POINT , BYTES 5,6
+        INC	HL
+        LD	B,(HL)
+        INC	HL
+        LD	A,(HL)          ;SET UP FOR DRIVE TYPES , BYTE 7
+        LD	(DTYPE),A
+        POP	HL              ;GET TRANSFER START ADDRESS
+        PUSH	BC              ;SET UP ENTRY POINT INTO DOS
+        XOR	A
+        LD	B,A
+        LD	C,A
+        CALL	RDATA           ;LOAD DOS FROM DRIVE
+        JP	LFB17           ;SELECT ALL RAM AND ENTER DOS
+;***********************************************************************
+;LOOK UP TABLE FOR MOS/RST 08'S
+MCAL:	DEFW	ARITH		;/ 80 /    MCAL ARITH
+        DEFW	BAUD		;/ 81 /    MCAL BAUD
+        DEFW	COPY		;/ 82 /    MCAL COPY
+        DEFW	DECIML		;/ 83 /    MCAL DECIML
+        DEFW	EXEC		;/ 84 /    MCAL EXEC
+        DEFW	MFILL		;/ 85 /    MCAL MFILL
+        DEFW	GOTO		;/ 86 /    MCAL GOTO
+        DEFW	HEX		;/ 87 /    MCAL HEX
+        DEFW	CALERR          ;/ 88 /    MCAL 
+        DEFW	CALERR          ;/ 89 /    MCAL 
+        DEFW	CALERR          ;/ 8A /    MCAL 
+        DEFW	CALERR          ;/ 8B /    MCAL
+	DEFW	MODIFY		;/ 8C /    MCAL MODIFY
+        DEFW	CALERR          ;/ 8D /    MCAL 
+        DEFW	CALERR          ;/ 8E /    MCAL 
+        DEFW	CALERR          ;/ 8F /    MCAL 
+        DEFW	CALERR          ;/ 90 /    MCAL 
+        DEFW	RDBLOK		;/ 91 /    MCAL RDBLOK
+        DEFW	CALERR          ;/ 92 /    MCAL 
+        DEFW	TBLATE		;/ 93 /    MCAL TBLATE
+        DEFW	CALERR          ;/ 94 /    MCAL 
+        DEFW	CALERR          ;/ 95 /    MCAL 
+        DEFW	WRBLOK		;/ 96 /    MCAL WRBLOK
+        DEFW	COLD		;/ 97 /    MCAL COLD
+        DEFW	WARM		;/ 98 /    MCAL WARM
+        DEFW	REGSTR		;/ 99 /    MCAL REGSTR
+        DEFW	ZINIT		;/ 9A /    MCAL ZINIT
+        DEFW	ZRSCAN		;/ 9B /    MCAL ZRSCAN
+        DEFW	ZKEYIN		;/ 9C /    MCAL ZKEYIN
+        DEFW	ZGETLN		;/ 9D /    MCAL ZGETLN
+        DEFW	ZOUTC		;/ 9E /    MCAL ZOUTC
+        DEFW	ZPOUT		;/ 9F /    MCAL ZPOUT
+        DEFW	ZSLOUT		;/ A0 /    MCAL ZSLOUT
+        DEFW	ZSRLIN		;/ A1 /    MCAL ZSRLIN
+        DEFW	ZRSECT		;/ A2 /    MCAL ZRSECT
+        DEFW	ZWSECT		;/ A3 /    MCAL ZWSECT
+        DEFW	ZRBLK		;/ A4 /    MCAL ZRBLK
+        DEFW	ZWBLK		;/ A5 /    MCAL ZWBLK
+        DEFW	ZCRLF		;/ A6 /    MCAL ZCRLF
+        DEFW	ZCRLFZ		;/ A7 /    MCAL ZCRLFZ
+        DEFW	ZSPACE		;/ A8 /    MCAL ZSPACE
+        DEFW	ZPR4HX		;/ A9 /    MCAL ZPR4HX
+        DEFW	ZP2HXZ		;/ AA /    MCAL ZP2HXZ
+        DEFW	ZPR2HX		;/ AB /    MCAL ZPR2HX
+        DEFW	ZFC4HX		;/ AC /    MCAL ZFC4HX
+        DEFW	ZFC2HX		;/ AD /    MCAL ZFC2HX
+        DEFW	ZDCMD		;/ AE /    MCAL ZDCMD
+        DEFW	ZHMDSC		;/ AF /    MCAL ZHMDSC
+        DEFW	ZIGBLK		;/ B0 /    MCAL ZIGBLK
+        DEFW	ZRDMEM		;/ B1 /    MCAL ZRDMEM
+        DEFW	ZRCPYU		;/ B2 /    MCAL ZRCPYU
+        DEFW	ZRCPYD		;/ B3 /    MCAL ZRPCYD
+        DEFW	ZMOUT		;/ B4 /    MCAL ZMOUT
+        DEFW	ZKSCAN		;/ B5 /    MCAL ZKSCAN
+        DEFW	ZSLDSC		;/ B6 /    MCAL ZSLDSC
+        DEFW	ZSETRK		;/ B7 /    MCAL ZSETRK
+        DEFW	ZSETSC		;/ B8 /    MCAL ZSETSC
+        DEFW	ZSETBF		;/ B9 /    MCAL ZSETBF
+        DEFW	ZRD128		;/ BA /    MCAL ZRD128
+        DEFW	ZWR128		;/ BB /    MCAL ZWR128
+        DEFW	ZZTIME		;/ BC /    MCAL ZZTIME
+        DEFW	ZFDRST		;/ BD /    MCAL ZFDRST
+        DEFW	ZSRSRS		;/ BE /    MCAL ZSYSRS
+        DEFW	ZLOGO		;/ BF /    MCAL ZLOGO
+        DEFW	ZPINIT		;/ C0 /    MCAL ZPINIT
+        DEFW	ZSREG		;/ C1 /    MCAL ZSREG
+        DEFW	ZVRIN		;/ C2 /    MCAL ZVRIN
+        DEFW	ZVROUT		;/ C3 /    MCAL ZVROUT
+        DEFW	ZPLOT		;/ C4 /    MCAL ZPLOT
+        DEFW	ZPLTXY		;/ C5 /    MCAL ZPLTXY
+        DEFW	ZPOINT		;/ C6 /    MCAL ZPOINT
+        DEFW	ZPNTXY		;/ C7 /    MCAL ZPNTXY
+        DEFW	ZDRWTO		;/ C8 /    MCAL ZDRWTO
+        DEFW	ZPOLYG		;/ C9 /    MCAL ZPOLYG
+        DEFW	ZORGCO		;/ CA /    MCAL ZORGCO
+        DEFW	ZCALAD		;/ CB /    MCAL ZCALAD
+        DEFW	ZSETCL		;/ CC /    MCAL ZSETCL
+        DEFW	ZFILL		;/ CD /    MCAL ZFILL
+        DEFW	ZIMULT		;/ CE /    MCAL ZIMULT
+        DEFW	ZPRM		;/ CF /    MCAL ZPRM
+        DEFW	ZVOUT		;/ D0 /    MCAL ZVOUT
+        DEFW	ZSCURS		;/ D1 /    MCAL ZSCURS
+        DEFW	ZROM		;/ D2 /    MCAL ZROM
+        DEFW	Z80INIT		;/ D3 /    MCAL Z80INIT
+L032A:	DEFW	ZST80		;/ D4 /    MCAL ZST80
+;***********************************************************************
+;MCAL &80 ARITHMETIC COMMAND
+;MOS COMMAND : SYNTAX A xxxx yyyy
+;INPUT REGISTERS	HL	= xxxx
+;			DE	= yyyy
+ARITH:	EX	DE,HL
+        PUSH	HL
+        ADD	HL,DE
+        DEFB	0CFH,0A9H	;MCAL ZPR4HX   PRINT SUM
+        POP	HL
+        OR	A
+        SBC	HL,DE
+        DEFB	0CFH,0A9H	;MCAL ZPR4HX   PRINT DIFFERENCE
+        DEC	HL
+        DEC	HL
+        LD	A,H
+        RLC	L
+        ADC	A,00H
+        JR	NZ,L0345        ;JUMP IF OFFSET > 256
+        LD	A,L
+        RRCA
+	JP	ZPR2HX		;PRINT OFFSET
+L0345:	RST	18H             ;ERROR IN OFFSET
+        .db	'-','-'+$80
+        RET
+;***********************************************************************
+;MCAL &81 BAUD RATE
+;MOS COMMAND : SYNTAX B xy wwzz
+;INPUT REGISTERS	L<4:7>	= x  - RECEIVE RATE
+;			L<0:3>	= y  - TRANSMIT RATE
+;			D	= ww - MODE BYTE
+;			E	= zz - COMMAND BYTE
+BAUD:	LD	A,L
+        PUSH	AF
+        AND	0FH		;CONSIDER TRANSMIT RATE
+        LD	L,A		;SET TX RATE
+        LD	H,A
+        POP	AF
+        AND	0F0H		;CONSIDER RECEIVE RATE
+        JR	Z,RX75		;JUMP IF RX=75
+        RRCA			;XFER RX RATE TO LOWER NIBBLE
+        RRCA
+        RRCA
+        RRCA
+        LD	H,A		;SET RX RATE
+RX75:	PUSH	HL
+        LD	A,L             ;SET UP TRANSMIT RATE
+        LD	C,CTC
+        CALL	BRATE		;SET BAUD RATE
+        POP	HL
+        RET	C		;ERROR ?
+        LD	A,H             ;SET UP RECEIVE RATE
+        LD	C,CTC+1
+        CALL	BRATE		;SET BAUD RATE
+        RET	C		;ERROR ?
+        LD	A,D             ;COMMAND TO BE CHANGED?
+        OR	E
+        RET	Z               ;RETURN IF NOT
+        LD	A,40H
+        OUT	(PCI+1),A       ;RESET PCI
+        LD	A,D
+        OUT	(PCI+1),A       ;SET MODE
+        LD	A,E
+        OUT	(PCI+1),A       ;SET COMMAND
+        RET
+;***********************************************************************
+BRATE:	CP	9		;TOP LIMIT FOR BAUD RATE
+        CCF
+        RET	C               ;RETURN IF BAUD RATE OUT OF RANGE
+        LD	HL,BTABLE	;ADDRESS OF LOOK UP TABLE
+        ADD	A,A             ;SET UP ADDRESS IN TABLE
+        ADD	A,L
+        LD	L,A
+        JR	NC,BVALUE
+        OR	A
+        INC	H
+BVALUE:	LD	B,(HL)          ;GET BAUD RATE VALUES
+        INC	HL
+        LD	A,(HL)
+        JP	L0FBC           ;SEND 'AB' TO PCI AND RETURN TO CALLER
+;***********************************************************************
+;LOOK UP TABLE FOR BAUD RATES
+;75-600 CTC SET AS TIMER 	BAUD = 1/(COUNT*256*250NSECS)
+;1200-9600 CTC SET AS COUNTER	BAUD = 1/(2*COUNT*16*250NSECS)
+BTABLE:	DEFB	208,1DH		;<0>   75	  75.12
+        DEFB	142,1DH  	;<1>  110	 110.04
+        DEFB	104,1DH		;<2>  150	 150.24
+        DEFB	52,1DH		;<3>  300	 300.48
+        DEFB	26,1DH		;<4>  600	 600.96
+        DEFB	104,5DH  	;<5> 1200	1201.92
+        DEFB	52,5DH		;<6> 2400	2403.85
+        DEFB	26,5DH   	;<7> 4800	4807.69
+        DEFB	13,5DH         	;<8> 9600	9615.38
+;***********************************************************************
+;MCAL &82 COPY COMMAND
+;MOS COMMAND : SYNTAX C xxxx yyyy zzzz
+;INPUT REGISTERS	HL	= xxxx - START
+;			DE	= yyyy - FINISH
+;			BC	= zzzz - DESTINATION
+COPY:	EX	DE,HL
+        OR	A
+        SBC	HL,DE
+        RET	C
+        PUSH	BC
+        EX	(SP),HL
+        POP     BC
+        EX	DE,HL
+	INC	BC
+        OR	A
+        SBC	HL,DE		;DETERMINE METHOD OF COPYING
+        ADD	HL,DE
+        JR	C,CPYD
+CPYU:	DEFB	0CFH,0B2H	;MCAL ZRCPYU
+        RET
+CPYD:	EX	DE,HL
+        ADD	HL,BC
+        EX	DE,HL
+        ADD	HL,BC
+        DEC	HL
+        DEC	DE
+        DEFB	0CFH,0B3H	;MCAL ZRCPYD
+        RET
+;***********************************************************************
+;MCAL &83 DECIMAL COMMAND
+;MOS COMMAND : SYNTAX D xxxx
+;INPUT REGISTER		HL	= xxxx
+DECIML:	LD	E,0
+        LD	BC,10000
+        CALL	DUNITS		;PRINT NUMBER OF 10000'S
+        LD	BC,1000
+        CALL	DUNITS		;PRINT NUMBER OF 1000'S
+        LD	BC,100
+        CALL	DUNITS		;PRINT NUMBER OF 100'S
+        LD	BC,10
+        CALL	DUNITS		;PRINT NUMBER OF 10'S
+        LD	A,L
+        JR	DPRT		;PRINT NUMBER OF 1'S
+DUNITS:	LD	A,0FFH		;CALCULATE NUMBER OF TIMES BC IS IN NUMBER
+DVALUE: OR	A
+        SBC	HL,BC		;NUMBER=NUMBER-UNITS
+        INC	A
+        JR	NC,DVALUE	;LOOP IF STILL NUMBER > 0
+        ADD	HL,BC		;RESTORE TO POSITIVE NUMBER
+        INC	E
+        DEC	E
+	JR	NZ,DPRT
+        INC	A
+        DEC	A
+        RET	Z
+DPRT:	ADD	A,30H		;PRINT NUMBER OF UNITS OCCUR IN NUMBER
+        LD	E,1
+        RST	10H
+        RET
+;***********************************************************************
+;MCAL &85 FILL COMMAND
+;MOS COMMAND : SYNTAX F xxxx yyyy zz
+;INPUT REGISTER		HL	= xxxx - START
+;			DE	= yyyy - FINISH
+;			C	= zz   - VALUE
+MFILL:	EX	DE,HL
+        OR	A
+        SBC	HL,DE
+        RET	C		;ERROR IF START < FINISH
+        LD	A,C
+	JR	NZ,L03F6	;JUMP IF START <> FINISH
+        LD	(DE),A
+        RET
+L03F6:	LD	B,H
+        LD	C,L
+        LD	H,D
+        LD	L,E
+        INC	DE
+        LD	(HL),A
+        JR	CPYU
+;***********************************************************************
+;MCAL &86 GOTO
+;MOS COMMAND : SYNTAX G xxxx yyyy
+;INPUT REGISTER		HL	= xxxx - EXECUTION ADDRESS
+;			DE	= yyyy - BREAKPOINT ADDRESS
+GOTO:	LD	(USERPC),HL
+        EX	DE,HL
+;MCAL &84 EXECUTE - STARTS FROM CURRENT PROGRAM COUNTER
+;MOS COMMAND : SYNTAX E xxxx
+;INPUT REGISTER		HL	= xxxx - BREAKPOINT ADDRESS
+EXEC:	DI			;DISABLE INTERRUPTS 
+        LD	A,H
+        OR	L
+        JR	Z,ENOBP		;JUMP IF NO BREAKPOINT TO BE SET
+        DEFB	0CFH,0B1H	;MCAL ZRDMEM
+        LD	(BPADD),HL	;SAVE AND SET UP FOR BRAKPOINT
+        LD	(BPCODE),A
+        LD	(HL),0FFH
+ENOBP:	LD	SP,VSTAT	;RESTORE REGISTERS
+        POP	AF
+        LD	I,A
+        POP	IX
+        POP	IY
+        POP	AF
+        POP	AF
+        POP	BC
+        POP	DE
+        POP	HL
+        EXX
+        EX	AF,AF'
+        POP	AF
+        POP	BC
+        POP	DE
+        LD	SP,(USERSP)
+        LD	HL,(USERPC)
+        PUSH	HL
+        LD	HL,(USERHL)
+        EI
+        JP	LFB17		;GO TO IT !
+;***********************************************************************
+;MCAL &87 HEXX
+;MOS COMMAND : SYNTAX H DDDDD
+;INPUT REGISTER		DE	= POINTER TO NUMBER DDDDD
+HEX:	DEFB	0CFH,0B0H	;MCAL ZIGBLK
+        LD	HL,0000H
+L0439:  LD	A,(DE)
+        OR	A
+        JR	Z,L0459		;JUMP IF NO NUMBER
+        INC	DE		;SET TO NEXT LOCATION
+        SUB	30H		;CONVERT ASCII TO NUMBER
+        CP      0AH		;CHECK NUMBER VALID
+        CCF
+        RET	C		;ERROR IF NUMBER > 9
+        LD	BC,199AH
+	SBC	HL,BC
+        ADD	HL,BC
+        CCF
+        RET	C		;RETURN IF NUMBER TOO GREAT
+        ADD	HL,HL
+        LD	B,H
+        LD	C,L
+        ADD	HL,HL
+        ADD	HL,HL
+        ADD	HL,BC
+        LD	C,A
+        LD	B,0
+        ADD	HL,BC
+        JR	NC,L0439
+        RET			;RETURN TO PRINT HEX NUMBER
+;***********************************************************************
+L0459:	DEFB	0CFH,0A9H	;MCAL ZPR4HX
+        RET
+;***********************************************************************
+;MCAL &8C MODIFY
+;MOS COMMAND : SYNTAX M xxxx
+;INPUT REGISTER		HL	= xxxx - ADDRESS TO MODIFY
+MODIFY:	DEFB	0CFH,0A9H	;MCAL ZPR4HX PRINT ADDRESS
+        DEFB	0CFH,0B1H	;MCAL ZRDMEM GET BYTE
+        DEFB	0CFH,0ABH	;MCAL ZPR2HX PRINT BYTE AT ADDRESS
+        RST	18H
+        DEFB	08H,088H	;CURSOR TWO POSITIONS LEFT
+        LD	DE,LFBB8
+        DEFB	0CFH,09DH	;MCAL ZGETLN
+        PUSH	HL
+        CALL	L01DC
+        DEFB	0CFH,0ACH	;MCAL ZFC4HX
+        JR	C,L0482
+        POP	BC
+L0473:  DEFB	0CFH,0B0H	;MCAL ZIGBLK
+        JR	Z,MODIFY
+        CP	'.'
+        RET	Z		;RETURN IF COMMAND ENDED
+        DEFB	0CFH,0ADH	;MCAL ZFC2HX
+        JR	C,L0483
+        LD	(HL),A		;MODIFY BYTE
+        INC	HL		;NEXT ADDRESS
+        JR	L0473
+;***********************************************************************
+L0482:	POP	HL
+L0483:	RST	18H
+        DEFB	'?',CR,LF+80H
+        JR	MODIFY
+;***********************************************************************
+;MCAL &91 READ FROM DISC
+;MOS COMMAND : SYNTAX R xxxx yyyy sstt d
+;INPUT REGISTER		HL	= xxxx - POINTER TO START OF TEXT
+;			DE	= yyyy - POINTER TO END OF TEXT
+;			B	= ss   - SECTOR
+;			C	= tt   - TRACK
+;			A	= d    - DRIVE
+RDBLOK:	CALL	L0536
+RDATA:	DEFB	0CFH,0A4H	;MCAL ZRBLK
+        RET	Z		;RETURN IF NO ERROR
+        JR	DERR
+;***********************************************************************
+;MCAL &96 WRITE TO DISC
+;MOS COMMAND : SYNTAX W xxxx yyyy sstt d
+;INPUT REGISTER		HL	= xxxx - POINTER TO START OF TEXT
+;			DE	= yyyy - POINTER TO END OF TEXT
+;			B	= ss   - SECTOR
+;			C	= tt   - TRACK
+;			A	= d    - DRIVE
+WRBLOK:	CALL	L0536
+        DEFB	0CFH,0A5H	;MCAL ZWBLK
+        RET	Z		;RETURN IF NO ERROR
+DERR:	RST	18H
+	    .db	'Disc:',' '+$80
+        LD	A,(DERROR)
+        DEC	A
+        JR	Z,DERR1
+        DEC	A
+        JR	Z,DERR2
+        DEC	A
+        JR	Z,DERR3
+        DEC	A
+        JR	Z,DERR4
+DERR5:	RST	18H
+        .db	'No Driv','e'+$80
+        JR	L04E5
+DERR4:	RST	18H
+        .db	'Not Read','y'+$80
+        JR	L04E5
+DERR1:	RST	18H
+        .db    'Bad Dat','a'+$80
+        JR	L04E5
+DERR2:	RST	18H
+        .db	'Protecte','d'+$80
+        JR	L04E5
+DERR3:	RST	18H
+        .db	'No Secto','r'+$80
+L04E5:  JP      L01FC 
+;***********************************************************************
+;MCAL &A4 READ BLOCK
+ZRBLK:	CALL	L0542
+RBLK:   PUSH	DE
+        DEFB	0CFH,0A2H	;MCAL ZRSECT
+        POP	DE
+        JR	NZ,BLKERR	;JUMP IF ERROR
+        CALL	L050B
+        JR	C,RBLK		;LOOP IF MORE TO READ
+        JR	BLKERR
+;***********************************************************************
+;MCAL &A5 WRITE BLOCK
+ZWBLK:	CALL	L0542
+WBLK:   PUSH	DE
+        DEFB	0CFH,0A3H	;MCAL ZWSECT
+        POP	DE
+        JR	NZ,BLKERR	;JUMP IF ERROR
+        CALL	L050B
+        JR	C,WBLK		;LOOP IF MORE TO WRITE
+BLKERR:	LD	A,(DERROR)
+        OR	A
+        RET
+;***********************************************************************
+L050B:	LD	HL,HSTSEC
+        INC	(HL)
+        CALL	GNSECT
+        LD	C,A
+        LD	A,(HL)
+	CP	C
+        JR	C,L0525
+        LD	(HL),00H
+        DEC	HL
+        INC	(HL)
+        LD	A,(HL)
+        CP	40
+        JR	C,L0525		;JUMP IF VALID TRACK
+        POP	HL
+        LD	A,3		;SET UP NO SECTOR ERROR
+        JR	L0532
+;***********************************************************************
+;SET HSTDMA POINTER FOR NEXT SECTOR
+L0525:	LD	HL,(HSTDMA)
+        LD	BC,512
+        ADD	HL,BC
+        LD	(HSTDMA),HL
+        XOR	A
+        SBC	HL,DE
+L0532:	LD	(DERROR),A
+        RET
+;***********************************************************************
+L0536:	EXX
+        DEFB	0CFH,0B0H	;MCAL ZIGBLK
+        DEFB	0CFH,0ACH	;MCAL ZFC4HX
+        LD	A,L
+        EXX
+        CP	4
+        RET	C
+        JR	L04E5
+;***********************************************************************
+;STORE CURRENT DRIVE INFO
+L0542:	LD	(HSTDSC),A
+        LD	(HSTDMA),HL
+        LD	(HSTTRK),BC
+        RET
+;***********************************************************************
+;MCAL &93 TABULATE
+;MOS COMMAND : SYNTAX T xxxx yyyy zz
+;INPUT REGISTER		HL	= xxxx - START ADDRESS
+;			DE	= yyyy - END ADDRESS
+;			C	= zz   - BYTES
+TBLATE:	LD	A,C
+        OR	A
+        JR	NZ,L0553	;JUMP IF NUMBER OF BYTES SPECIFIED
+        LD	A,8		;SET UP DEFAULT NUMBER OF BYES
+L0553:	LD	C,A
+TBLADD:	DEFB	0CFH,09BH	;MCAL ZRSCAN
+        CP	1BH
+        RET	Z		;RETURN IF ESCAPE KEY PRESSED
+	DEFB	0CFH,0A9H	;MCAL ZPR4HX PRINT ADDRESS
+	LD	B,C
+        PUSH	HL
+TBLHEX:	DEFB	0CFH,0B1H	;MCAL ZRDMEM GET BYTE
+        DEFB	0CFH,0AAH	;MCAL ZP2HXZ PRINT BYTE FOLLOWED BY SPACE
+        OR	A
+        SBC	HL,DE
+        ADD	HL,DE
+        INC	HL
+        JR	NC,L056A	;END ADDRESS REACHED WITHIN LINE ?
+        DJNZ	TBLHEX		;LOOP PRINTING BYTES
+L056A:	POP	HL
+	LD	B,C
+TBLASC:	DEFB	0CFH,0B1H	;MCAL ZRDMEM
+        AND	07FH		;CHECK FOR VALID ASCII CHARACTER
+        CP	20H
+        JR	C,TBLDOT
+        CP	07FH
+        JR	NZ,TBLKEY
+TBLDOT:	LD	A,'.'
+TBLKEY:	RST	10H
+	OR	A
+	SBC	HL,DE
+	ADD	HL,DE
+	INC	HL
+	RET	NC
+	DJNZ	TBLASC		;LOOP DISPLAYING ASCII CHARACTER
+	DEFB	0CFH,0A6H	;MCAL ZCRLF
+	JR	TBLADD		;NEXT LINE TO PRINT
+;***********************************************************************
+;MCAL &97 COLD START
+;MOS COMMAND : SYNTAX X
+COLD:	LD	HL,(CLDVCT)
+	JR	L058F
+;***********************************************************************
+;MCAL &98 WARM START
+;MOS COMMAND : SYNTAX Y
+WARM:	LD	HL,(WRMVCT)
+L058F:	PUSH	HL
+	JP	LFB17		;GO TO IT
+;***********************************************************************
+;MCAL &99 DISPLAY REGISTERS
+;MOS COMMAND : SYNTAX ZX
+;INPUT REGISTER		L	= x - REGISTER SET
+REGSTR:	LD	A,L
+	CP	2
+	JR	Z,REGZ2		;JUMP IF Z2
+	CCF
+	RET	C		;RETURN IF ERROR 
+	OR	A
+	LD	DE,USERAF
+	LD	A,20H
+	JR	Z,L05A7		;JUMP IF Z0
+	LD	DE,MOSAF
+	LD	A,27H
+L05A7:	PUSH	AF
+	DEFB	0CFH,0A7H	;MCAL ZCRLFZ
+	POP	AF
+	RST	10H
+L05AC:	PUSH	AF
+	RST	18H
+	DEFB	'A  BC   DE   HL '
+	.db	'  PC  SZ-H-PN','C'+$80
+	POP	AF
+	RST	10H
+	DEFB	0CFH,0A6H	;MCAL ZCRLF
+	PUSH	DE
+	CALL	L05FE
+	POP	HL
+	LD	C,(HL)		;GET FLAGS
+	LD	B,8
+	LD	A,18H
+L05DA:	RLC	C
+	RLA			;CONVERT INTO 0 OR 1
+	RST	10H
+	RRA
+	DJNZ	L05DA		;LOOP PRINTING FLAGS
+	OR	A
+	RET
+;***********************************************************************
+REGZ2:	LD	DE,VSTAT	
+	RST	18H
+	DEFB	' I  IX   IY   SP'
+	DEFB	'   PC',CR,LF+80H
+L05FE:	CALL	L0F08
+	LD	A,H
+	DEFB	0CFH,0AAH	;MCAL ZP2HXZ
+	LD	B,3
+L0606:	CALL	L0F08
+	DEFB	0CFH,0A9H	;MCAL ZPR4HX
+	DJNZ	L0606		;LOOP UNTIL 'IY' PRINTED
+	LD	HL,(USERPC)
+	DEFB	0CFH,0A9H	;MCAL ZPR4HX
+	OR	A
+L0613:	RET
+;***********************************************************************
+;MCAL &9D GET TEXT FROM KEYBOARD
+;INPUT REGISTER		DE	= POINTER  TO START OF TEXT LINE
+;FLAGS			ZERO	= VALID KEY
+ZGETLN:	DEFB	0CFH,09CH	;MCAL ZKEYIN
+	RST	10H		;ECHO KEY PRESSED
+	CP	0DH
+	JR	NZ,ZGETLN	;LOOP UNTIL 'ENTER' PRESSED
+	PUSH	BC
+	PUSH	HL
+	PUSH	DE
+	XOR	A
+	DEFB	0CFH,0D1H	;MCAL ZCURS
+	POP	HL
+	PUSH	HL
+	LD	A,(PCFLAGS)
+	BIT	2,A		;CHECK FOR 80 COLUMN
+	LD	A,(WIDTH)
+	LD	E,A
+	LD	D,A
+	JR	NZ,L0638	;JUMP IF NOT 80 COLUMN MODE
+L062F:	RST	28H
+	LD	(HL),A
+	INC	HL
+	INC	BC
+	DEC	E
+	JR	NZ,L062F
+	JR	L0643
+;***********************************************************************
+L0638:	CALL	L0BE9
+	LD	(HL),A
+	INC	HL
+	CALL	L0BCF
+	DEC	E
+	JR	NZ,L0638
+L0643:	LD	(HL),00H
+	DEC	D
+	JR	Z,L064E
+	DEC	HL
+	LD	A,(HL)
+	CP	20H
+	JR	Z,L0643
+L064E:	POP	DE
+	LD	HL,PROMPT
+	LD	A,(DE)
+	AND	7FH
+	CP	(HL)
+	JR	NZ,L0659
+	INC	DE
+L0659:	RST	18H
+	DEFB	LF+80H
+	POP	HL
+	POP	BC
+	RET
+;***********************************************************************
+;MCAL &9C INPUT KEY - WAITS FOR KEY TO BE PRESSED
+;OUTPUT REGISTER	A	= KEY PRESSED
+;FLAGS			ZERO	= VALID KEY
+ZKEYIN:	LD	A,(FKEY)
+	OR	A
+	JR	Z,L067F
+	PUSH	BC
+	LD	BC,(FVRAM)
+	RST	28H
+	INC	C
+	BIT	7,A		;CECK FOR SHIFT CHARACTER
+	RES	7,A
+	LD	(FVRAM),BC
+	POP	BC
+	RET	Z
+	PUSH	AF
+	XOR	A
+	LD	(FKEY),A
+	LD	(KEYBUF),A
+	POP	AF
+	RET
+;***********************************************************************
+L067F:	PUSH	HL
+	PUSH	DE
+	PUSH	BC
+	LD	A,(KEYBUF)
+	OR	A
+	PUSH	AF
+	JR	NZ,L06BB
+	POP	AF
+	DEFB	0CFH,0D1H	;MCAL ZSCURS
+L068C:	DEFB	0CFH,0C2H	;MCAL ZVRIN
+	LD	(CCODE),A
+L0691:	CALL	L0AB3
+	CALL	L06C4
+	JR	NZ,L06A1
+	CALL	L0AA8
+	CALL	L06C4
+	JR	Z,L068C
+L06A1:	CALL	L0AB3
+	DEFB	0CFH,09BH	;MCAL ZRSCAN
+	JR	NZ,L06B7
+	LD	A,(PCFLAGS)
+	BIT	2,A		;CHECK FOR 80 COLUMN
+	JR	Z,L0691
+	LD	B,0
+L06B1:	PUSH	HL		;DELAY LOOP
+	POP	HL
+	DJNZ	L06B1
+	JR	L0691
+;***********************************************************************
+L06B7:	PUSH	AF
+	CALL	L0AA8
+L06BB:	XOR	A
+	LD	(KEYBUF),A
+	POP	AF
+	POP	BC
+	POP	DE
+	POP	HL
+	RET
+;***********************************************************************
+L06C4:	LD	A,(BLINK)
+	LD	D,A
+	LD	E,00H
+L06CA:	CALL	L0763
+	RET	NZ
+	DEC	DE
+	LD	A,D
+	OR	E
+	JR	NZ,L06CA
+	LD	HL,KFLAG
+	RET
+;***********************************************************************
+;MCAL &9B REPEAT KEY SCAN - DOESN'T WAIT FOR KEY TO BE PRESSED
+;OUTPUT REGISTER	A	= KEY PRESSED ( ZERO IF NONE PRESSED)
+ZRSCAN:	PUSH	HL
+	PUSH	DE
+	PUSH	BC
+	CALL	L0763
+	JP	Z,L0754
+	DEFB	0CFH,0B5H	;MCAL ZKSCAN
+	INC	(HL)
+	DEC	(HL)
+	JR	Z,L06FE
+	OR	A
+	JR	NZ,L06F5
+	LD	HL,KFLAG
+	BIT	3,(HL)
+	LD	HL,LKEY
+	JR	NZ,L0754
+	JR	L06FE
+;***********************************************************************
+L06F5:	PUSH	BC
+	LD	B,A
+	SUB	(HL)
+	AND	0FH
+	LD	A,B
+	POP	BC
+	JR	Z,L0708
+L06FE:	PUSH	AF
+	LD	A,(KDEL)
+	LD	(LFBB5),A
+	POP	AF
+	JR	L0724
+;***********************************************************************
+L0708:	LD	HL,LFBB5
+	DEC	(HL)
+	JR	NZ,L071C
+	XOR	A
+	LD	(LKEY),A
+	LD	A,(KSCAN)
+	LD	(LFBB5),A
+	DEFB	0CFH,0B5H	;MCAL ZKSCAN
+	JR	NZ,L0724
+L071C:	LD	HL,KFLAG
+	RES	0,(HL)
+	XOR	A
+	JR	L0754
+;***********************************************************************
+L0724:	LD	(HL),A
+	LD	HL,KFLAG
+	BIT	1,(HL)
+	JR	Z,L0754
+	LD	E,A
+	RES	7,E
+	LD	BC,3B80H
+	INC	E
+L0733:	DEC	E
+	JR	Z,L0743
+L0736:	XOR	A
+	INC	C
+	DEC	C
+	JR	Z,L0754
+	RST	28H
+	INC	C
+	BIT	7,A
+	JR	Z,L0736
+	JR	L0733
+;***********************************************************************
+L0743:	RST	28H
+	INC	C
+	BIT	7,A
+	RES	7,A
+	LD	(FVRAM),BC
+	JR	NZ,L0754
+	LD	HL,FKEY
+	LD	(HL),01H
+L0754:	OR	A
+	LD	HL,KFLAG
+	BIT	0,(HL)
+	RES	0,(HL)
+	LD	(KEYBUF),A
+	POP	BC
+	POP	DE
+	POP	HL
+	RET
+;***********************************************************************
+L0763:	PUSH	DE
+	LD	E,0FFH
+	CALL	L0FA2
+	POP	DE
+	RET	NZ
+	LD	(LKEY),A
+	RET
+;***********************************************************************
+;***********************************************************************
+;MCAL &B5 GET ANY KEY PRESSED
+;OUTPUT REGISTER	A	= KEY PRESSED
+;FLAGS			ZERO	= VALID KEY
+ZKSCAN:	LD	A,(KFLAG)
+	AND	80H
+	LD	(KFLAG),A
+	LD	E,01H
+	CALL	L0FA2
+	RRA
+	LD	B,A
+	JR	NC,L079D
+L0780:	CALL	L0FA5
+	RRA
+	JR	C,L0780
+	CALL	L0AA8
+	IN	A,(KBDMSK)
+	RLCA
+	JR	C,L0797
+	POP	AF
+	LD	DE,(BRKVCT)
+	PUSH	DE
+	JP	LFB17
+;***********************************************************************
+L0797:	RLCA
+	JP	NC,FBOOT
+	JR	L07DC
+;***********************************************************************
+L079D:	LD	HL,KFLAG
+	IN	A,(KBDMSK)
+	CPL
+	AND	0E0H
+	RRCA
+	OR	(HL)
+	LD	(HL),A
+	LD	A,B
+	SRL	A
+	JR	Z,L07DC
+	RRA
+	JR	NC,L07B2
+	LD	B,80H
+L07B2:	RRA
+	JR	NC,L07B7
+	LD	B,87H
+L07B7:	RRA
+	JR	NC,L07C9
+	LD	A,(HL)
+	XOR	80H
+	LD	(HL),A
+	IN	A,(ALPHA)
+L07C0:	CALL	L0FA5
+	BIT	4,A
+	JR	NZ,L07C0
+	JR	L07DC
+;***********************************************************************
+L07C9:	RRA
+	JR	NC,L07CE
+	LD	B,0DH
+L07CE:	RRCA
+	JR	NC,L07D3
+	LD	B,20H
+L07D3:	RRA
+	JR	NC,L07D8
+	LD	B,1BH
+L07D8:	SET	0,(HL)
+	SET	3,(HL)
+L07DC:	LD	DE,0001H
+L07DF:	LD	C,0FFH
+	RLC	E
+	CALL	L0FA2
+	JR	Z,L0860
+L07E8:	INC	C
+	RRCA
+	LD	(KEY),A
+	JR	NC,L0858
+	LD	HL,KFLAG
+	BIT	3,(HL)
+	JP	NZ,L0883
+	PUSH	BC
+	LD	A,D
+	ADD	A,A
+	ADD	A,A
+	ADD	A,A
+	LD	B,A
+	ADD	A,A
+	ADD	A,B
+	LD	B,000H
+	LD	HL,L10C5
+	ADD	HL,BC
+	LD	C,A
+	ADD	HL,BC
+	LD	A,(KFLAG)
+	BIT	7,A
+	JR	Z,L0824
+	BIT	4,A
+	JR	NZ,L0824
+	LD	A,(HL)
+	CP	'a'
+	JR	C,L0824
+	CP	7BH
+	JR	NC,L0824
+	PUSH	HL
+	LD	HL,KFLAG
+	SET	2,(HL)
+	POP	HL
+L0822:	JR	L082B
+;***********************************************************************
+
+L0824:	LD	A,(KFLAG)
+	BIT	6,A		;CHECK FOR CONTROL CHARACTER
+	JR	Z,L082F		;JUMP IF CONTROL
+L082B:	LD	BC,0008H
+	ADD	HL,BC
+L082F:	POP	BC
+	LD	A,(KFLAG)
+	BIT	5,A		;CHECK FOR GRAPH CHARACTER
+	JR	Z,L0852		;JUMP IF GRAPH
+	BIT	6,A		;CHECK FOR CONTROL CHARACTER
+	JR	NZ,L0883	;JUMP IF NOT CONTROL
+	PUSH	BC
+	LD	BC,0008H
+	ADD	HL,BC
+	LD	A,(KFLAG)
+	BIT	2,A
+	LD	A,(KEY)
+	JR	NZ,L084B
+	ADD	HL,BC
+L084B:	POP	BC
+	LD	(KEY),A
+	LD	A,(KFLAG)
+L0852:	OR	09H
+	LD	(KFLAG),A
+	LD	B,(HL)
+L0858:	LD	A,C
+	CP	7
+	LD	A,(KEY)
+	JR	NZ,L07E8
+L0860:	INC	D
+	LD	A,D
+	CP	7
+	JP	NZ,L07DF
+	CALL	L0F97
+	LD	HL,KFLAG
+	BIT	7,B
+	JR	Z,L087B
+	SET	1,(HL)
+	BIT	6,(HL)		;CHECK FOR CONTROL
+	JR	Z,L088D		;JUMP IF CONTROL
+	SET	3,B
+	JR	L088D
+;***********************************************************************
+L087B:	BIT	4,(HL)
+	JR	Z,L088D
+	SET	7,B
+	JR	L088D
+;***********************************************************************
+L0883:	LD	HL,KFLAG
+	RES	0,(HL)
+	CALL	L0F97
+L088B:	XOR	A
+	LD	B,A
+L088D:	BIT	0,(HL)
+	LD	HL,LKEY
+	RET	Z
+	LD	A,B
+	CP	(HL)
+	RET
+;***********************************************************************
+L0896:	LD	HL,PCFLAGS
+	BIT	3,(HL)		;CHECK FOR CHANGING CURSOR LOCATION
+	JP	NZ,L0A4E	;JUMP IF SO
+	BIT	1,(HL)		;CHECK FOR PRINTER ON
+	CALL	NZ,ZPOUT	;OUTPUT CHARACTER TO PRINTER IF SO
+	CP	20H
+	JR	C,L08BC		;JUMP IF CONTROL CHARACTER
+	LD	HL,PCFLAGS
+	BIT	2,(HL)		;CHECK FOR 80 COLUMN
+	JR	Z,L08B4		;JUMP IF NOT 80 COLUMN
+	BIT	7,(HL)		;CHECK FOR REVERSE VIDEO
+	JR	Z,L08B4
+	XOR	80H		;SET/RESET TOP BIT
+L08B4:	LD	HL,CUSROW
+	CALL	ZVOUT		;PRINT CHARACTER
+	JR	CTRLD
+;***********************************************************************
+;DEALING WITH CONTROL CHARACTER
+L08BC:	ADD	A,A		;2 BYTES PER ADDRESS
+	LD	L,A
+	LD	H,0
+	LD	DE,CTLTBL 	;POINTER FOR CONTROL CHARACTERS
+	ADD	HL,DE		;SET CONTROL CHARACTER POINTER
+	CALL	L0F09		;GET ADDRESS IN 'HL'
+	PUSH	HL		;SET UP ADDRESS FOR CONTROL CHRACTER
+	LD	HL,CUSROW
+	LD	A,(PCFLAGS)
+	RET			;GO TO CONTROL CHARACTER ROUTINE
+;***********************************************************************
+;MOVE CURSOR RIGHT
+CTRLD:	DEC	HL
+	INC	(HL)
+	LD	A,(WIDTH)
+	CP	(HL)
+	RET	NZ
+	LD	(HL),00H
+	INC	HL
+;MOVE CURSOR DOWN
+CTRLJ:	LD	A,24
+	DEC	A
+	CP	(HL)
+	JP	Z,L0CB3
+	INC	(HL)
+	RET
+;***********************************************************************
+;MOVE CURSOR UP
+CTRLK:	LD	A,(HL)
+	OR	A
+	RET	Z
+L08E5:	DEC	(HL)
+	RET
+;***********************************************************************
+;MOVE CURSOR LEFT
+CTRLH:	DEC	HL
+	LD	A,(HL)
+	OR	A
+	JR	NZ,L08E5
+	LD	A,(WIDTH)
+	DEC	A
+	LD	(HL),A
+	INC	HL
+	DEC	(HL)
+	RET	P
+;CURSOR HOME
+L08F4:	LD	(HL),00H
+;CARRIAGE RETURN
+CTRLM:	DEC	HL
+	LD	(HL),00H
+	RET
+;***********************************************************************
+;CLEAR SCREEN 80 COLUMN
+CTRLP:	LD	E,A
+	CALL	L0E31
+	RET	NZ
+	LD	A,E
+	LD	C,80
+	LD	DE,0000H
+	SET	2,A
+	LD	HL,10A0H
+	JR	L0920
+;***********************************************************************
+;CLEAR SCREEN 40 COLUMN
+CTRLN:	LD	C,40
+	LD	DE,920		;23 LINES OF CHARACTERS
+	LD	HL,10A0H
+	JR	L091E
+;***********************************************************************
+;CLEAR SCREEN 32 COLUMN
+CTRLO:	LD	C,32
+	LD	DE,736		;23 LINES OF CHARACTERS
+	LD	HL,1CA8H
+L091E:	RES	2,A
+L0920:	RES	7,A
+	LD	(PCFLAGS),A
+	LD	(KDEL),HL
+	LD	HL,WIDTH
+	LD	(HL),C
+	LD	(LENGTH),DE
+;MOVE CURSOR HOME AND CLEAR SCREEN
+CTRLL:	BIT	2,A
+	JR	NZ,L0952
+	LD	BC,3C00H
+	RST	20H
+	LD	BC,03C0H
+	LD	E,20H
+	CALL	L0CA6
+	RST	20H
+	LD	B,18H
+	CALL	L0CAF
+	LD	B,20H
+	RST	20H
+	CALL	L0C9F
+	XOR	A
+	CALL	L0DB0
+	JR	L0967
+;***********************************************************************
+L0952:	LD	BC,0040H
+L0955:	LD	A,20H
+L0957:	OUT	(C),A
+	DJNZ	L0957
+	INC	C
+	LD	A,48H
+	CP	C
+	JR	NZ,L0955
+	LD	HL,0000H
+	CALL	L0D30
+L0967:	LD	HL,CUSROW
+	JR	L08F4
+;***********************************************************************
+;DELETE ROW
+CTRLX:	DEC	HL
+	LD	(HL),00H
+	INC	HL
+;DELETE TO END OF LINE
+CTRLU:	DEC	HL
+L0971:	PUSH	HL
+	LD	HL,(CUSCOL)
+	EX	(SP),HL
+L0976:	LD	A,20H
+	CALL	ZVOUT
+	LD	A,(WIDTH)
+	INC	(HL)
+	CP	(HL)
+	JR	NZ,L0976
+L0982:	POP	HL
+	LD	(CUSCOL),HL
+	RET
+;***********************************************************************
+;DELETE TO END OF SCREEN
+CTRLV:	DEC	HL
+	PUSH	HL
+	CALL	L0971
+	EX	(SP),HL
+	LD	(HL),00H
+L098F:	LD	A,24
+	INC	HL
+	INC	(HL)
+	SUB	(HL)
+	JR	Z,L0982
+	DEC	HL
+	PUSH	HL
+	CALL	L0971
+	POP	HL
+	JR	L098F
+;***********************************************************************
+;DELETE TO LEFT
+L099E:	LD	A,(HL)
+	DEC	HL
+	OR	(HL)
+	RET	Z
+	LD	A,08H
+	RST	10H
+L09A5:	INC	HL
+;DELETE CHARACTER AT CURSOR
+CTRLF:	DEC	HL
+	PUSH	HL
+	DEFB	0CFH,0D1H	;MCAL ZSCURS
+	LD	HL,(CUSCOL)
+	EX	(SP),HL
+L09AE:	LD	A,(WIDTH)
+	DEC	A
+	CP	(HL)
+	JR	Z,L09C9
+	INC	BC
+	LD	A,(PCFLAGS)
+	BIT	2,A
+	JR	Z,L09C1
+	DEC	BC
+	CALL	L0BCF
+L09C1:	DEFB	0CFH,0C2H	;MCAL ZVRIN
+	CALL	ZVOUT
+	INC	(HL)
+	JR	L09AE
+;***********************************************************************
+L09C9:	LD	A,20H
+	CALL	ZVOUT
+	JR	L0982
+;***********************************************************************
+L09D0:	DEC	HL
+	PUSH	HL
+	DEFB	0CFH,0D1H	;MCAL ZSCURS
+	LD	HL,(CUSCOL)
+	EX	(SP),HL
+	LD	E,20H
+L09DA:	DEFB	0CFH,0C2H	;MCAL ZVRIN
+	INC	BC
+	PUSH	AF
+	LD	A,(PCFLAGS)
+	BIT	2,A
+	JR	Z,L09E9
+	DEC	BC
+	CALL	L0BCF
+L09E9:	LD	A,(WIDTH)
+	CP	(HL)
+	JR	Z,L09F8
+	LD	A,E
+	CALL	ZVOUT
+	INC	(HL)
+	POP	AF
+	LD	E,A
+	JR	L09DA
+;***********************************************************************
+L09F8:	POP	AF
+	JR	L0982
+;***********************************************************************
+;SCREEN DUMP TO PRINTER
+CTRLA:	LD	HL,(CUSCOL)
+	PUSH	HL
+	XOR	A
+	LD	B,A
+	LD	C,A
+L0A02:	CALL	L0A27
+L0A05:	LD	(CUSCOL),BC
+	PUSH	BC
+	DEFB	0CFH,0D1H	;MCAL ZSCURS
+ 	DEFB	0CFH,0C2H	;MCAL ZVRIN
+	DEFB	0CFH,09FH	;MCAL ZPOUT
+	POP	BC
+	LD	DE,(WIDTH)
+	LD	D,24
+	INC	C
+	LD	A,C
+	CP	E
+	JR	NZ,L0A05
+	LD	C,00H
+	INC	B
+	LD	A,B
+	CP	D
+	JR	NZ,L0A02
+	POP	HL
+	LD	(CUSCOL),HL
+L0A27:	PUSH	AF
+	LD	A,CR
+	DEFB	0CFH,09FH	;MCAL ZPOUT
+	LD	A,LF
+	DEFB	0CFH,09FH	;MCAL ZPOUT
+	POP	AF
+	RET
+;***********************************************************************
+;REVERSE VIDEO
+CTRLW:	XOR	80H
+	JR	L0A44
+;***********************************************************************
+;PRINTER ON
+CTRLR:	SET	1,A
+	JR	L0A44
+;***********************************************************************
+;CURSOR OFF
+CTRLT:	RES	0,A
+	JR	L0A44
+;***********************************************************************
+;CURSOR ON
+CTRLQ:	SET	0,A
+	JR	L0A44
+;***********************************************************************
+;PRINTER OFF
+CTRLS:	RES	1,A
+L0A44:	LD	(PCFLAGS),A
+NOCTRL:	RET
+;***********************************************************************
+;CHANGE OF CURSOR POSITION TO FOLLOW
+L0A48:	LD	HL,PCFLAGS
+	SET	3,(HL)
+	RET
+;***********************************************************************
+L0A4E:	BIT	4,(HL)
+	JR	NZ,L0A5D
+	SET	4,(HL)
+	LD	HL,WIDTH
+	CP	(HL)
+	RET	NC
+	LD	(CUSCOL),A
+	RET
+;***********************************************************************
+L0A5D:	RES	3,(HL)
+	RES	4,(HL)
+	CP	24
+	RET	NC
+	LD	(CUSROW),A
+	RET
+;***********************************************************************
+;LOOK UP TABLE FOR PRINT CONTROL CHAR'S
+CTLTBL:	DEFW	NOCTRL  ;/ 00 /	CTRL-
+	DEFW	CTRLA   ;/ 01 /	CTRL-A	SCREEN DUMP TO PRINTER
+	DEFW	NOCTRL  ;/ 02 /	CTRL-
+	DEFW	NOCTRL  ;/ 03 /	CTRL-
+	DEFW	CTRLD   ;/ 04 /	CTRL-	CURSOR RIGHT
+	DEFW	NOCTRL  ;/ 05 /	CTRL-
+	DEFW	CTRLF   ;/ 06 /	CTRL-F	DELETE AT CURSOR
+	DEFW	CTRLG   ;/ 07 /	CTRL-G	BEEB
+	DEFW	CTRLH   ;/ 08 /	CTRL-	CURSOR LEFT
+	DEFW	NOCTRL  ;/ 09 /	CTRL-I	TAB
+	DEFW	CTRLJ   ;/ 0A /	CTRL-	CURSOR DOWN
+	DEFW	CTRLK   ;/ 0B /	CTRL-	CURSOR UP
+	DEFW	CTRLL   ;/ 0C /	CTRL-	CURSOR HOME AND CLS
+	DEFW	CTRLM   ;/ 0D /	CTRL-	CARRIAGE RETURN
+	DEFW	CTRLN   ;/ 0E /	CTRL-N	CLS40
+	DEFW	CTRLO   ;/ 0F /	CTRL-O	CLS32
+	DEFW	CTRLP   ;/ 10 /	CTRL-P	CLS80
+	DEFW	CTRLQ   ;/ 11 /	CTRL-Q	CURSOR ON
+	DEFW	CTRLR   ;/ 12 /	CTRL-R	PRINTER ON
+	DEFW	CTRLS   ;/ 13 /	CTRL-S	PRINTER OFF
+	DEFW	CTRLT   ;/ 14 /	CTRL-T	CURSOR OF
+	DEFW	CTRLU   ;/ 15 /	CTRL-U	DELETE TO END OF LINE
+	DEFW	CTRLV   ;/ 16 /	CTRL-V	DELEE TO END OF SCREEN
+	DEFW	CTRLW   ;/ 17 /	CTRL-	REVERSE VIDEO
+	DEFW	CTRLX	;/ 18 /	CTRL-X	DELETE ROW
+	DEFW	L099E   ;/ 19 /	CTRL-	DELETE TO LEFT
+	DEFW	L09D0   ;/ 1A /	CTRL-	INSERT
+	DEFW	NOCTRL  ;/ 1B /	CTRL-	ESCAPE
+	DEFW	NOCTRL  ;/ 1C /	CTRL-	DELETE ROW
+	DEFW	L0A48   ;/ 1D /	CTRL-	CHANGE OF CURSOR POSITION TO FOLLOW
+	DEFW	L08F4   ;/ 1E /	CTRL-	CURSOR HOME
+L0AA6:	DEFW	NOCTRL  ;/ 1F /	CTRL-
+;***********************************************************************
+L0AA8:	LD	A,(PCFLAGS)
+	BIT	2,A
+	JR	Z,L0ACB		;JUMP IF NOT 80 COLUMN
+	LD	E,20H
+	JR	L0ABE
+;***********************************************************************
+L0AB3:	LD	A,(PCFLAGS)
+	BIT	2,A
+	RRA
+	JR	Z,L0AC6		;JUMP IF NOT 80 COLUMN
+	RET	NC
+	LD	E,00H
+L0ABE:	LD	A,0AH
+	OUT	(48H),A
+	LD	A,E
+	OUT	(49H),A
+	RET
+;***********************************************************************
+L0AC6:	LD	A,(CUSCDE)
+	JR	C,ZVOUT
+L0ACB:	LD	A,(CCODE)
+;MCAL &D0 OUTPUT CHARACTER - POSITION NOT INCREMENTED
+;INPUT REGISTER		A	= CHARACTER TO OUTPUT
+ZVOUT:	PUSH	HL
+	PUSH	DE
+	PUSH	BC
+	LD	B,A
+	LD	A,(PCFLAGS)
+	BIT	2,A
+	JR	NZ,L0B06	;JUMP IF 80 COLUMN
+	LD	A,(WIDTH)
+	CP	40
+	LD	A,B
+	JR	Z,L0B10		;JUMP IF 32 COLUMN
+	CALL	L0C4C
+	RST	30H
+	PUSH	HL
+	LD	HL,0008H
+	POP	BC
+	PUSH	HL
+	PUSH	DE
+	LD	D,L
+	CALL	L0D90
+	LD	B,L
+	LD	HL,PCFLAGS
+	BIT	7,(HL)
+	JR	Z,L0B01		;JUMP IF REVERSE VIDEO
+	LD	HL,VDPBUF
+L0AFB:	LD	A,(HL)
+	CPL
+	LD	(HL),A
+	INC	HL
+	DJNZ	L0AFB
+L0B01:	POP	BC
+	POP	HL
+	JP	L0BB0
+;***********************************************************************
+L0B06:	LD	A,B
+	CALL	L0C13
+	CALL	L0BD9
+	JP	L0BC2
+;***********************************************************************
+L0B10:	LD	BC,(CUSCOL)
+	LD	E,C
+	PUSH	AF
+	LD	A,C
+	AND	03H
+	SRL	C
+	SRL	C
+	EX	AF,AF'
+	LD	A,C
+	ADD	A,A
+	ADD	A,C	
+	LD	C,A
+	POP	AF
+	CALL	L0C51
+	RST	30H
+	EX	AF,AF'
+	LD	BC,0008H
+	BIT	1,A
+	EX	DE,HL
+	JR	Z,L0B31
+	ADD	HL,BC
+L0B31:	CP	03H
+	JR	Z,L0B62
+	PUSH	AF
+	LD	C,L
+	LD	B,H
+	PUSH	DE
+	LD	D,10H
+	CALL	L0D90
+	POP	BC
+	POP	AF
+	PUSH	HL
+	LD	HL,VDPBUF
+	LD	D,08H
+	OR	A
+	JR	Z,L0B86
+	DEC	A
+	JR	Z,L0B9B
+L0B4C:	CALL	L0BC6
+	AND	0FCH
+	PUSH	BC
+	LD	BC,0F03FH
+	RLCA
+	RLCA
+	CALL	L0BFA
+	POP	BC
+	INC	HL
+	INC	BC
+	DEC	D
+	JR	NZ,L0B4C
+	JR	L0BAC
+;***********************************************************************
+L0B62:	ADD	HL,BC
+	LD	B,H
+	LD	C,L
+	PUSH	DE
+	LD	D,08H
+	CALL	L0D90
+	POP	BC
+	PUSH	HL
+	LD	HL,VDPBUF
+	LD	D,08H
+L0B72:	LD	A,(HL)
+	AND	0C0H
+	LD	E,A
+	CALL	L0BC6
+	SRL	A
+	SRL	A
+	OR	E
+	LD	(HL),A
+	INC	HL
+	INC	BC
+	DEC	D
+	JR	NZ,L0B72
+	JR	L0B96
+;***********************************************************************
+L0B86:	CALL	L0BC6
+	AND	0FCH
+	LD	E,A
+	LD	A,(HL)
+	AND	03H
+	OR	E
+	LD	(HL),A
+	INC	HL
+	INC	BC
+	DEC	D
+	JR	NZ,L0B86
+L0B96:	LD	HL,0008H
+	JR	L0BAF
+;***********************************************************************
+L0B9B:	CALL	L0BC6
+	PUSH	BC
+	LD	BC,0FC0FH
+	AND	B
+	CALL	L0BFA
+	POP	BC
+	INC	HL
+	INC	BC
+	DEC	D
+	JR	NZ,L0B9B
+L0BAC:	LD	HL,0010H
+L0BAF:	POP	BC
+L0BB0:	PUSH	HL
+	PUSH	BC
+	LD	D,L
+	CALL	L0DA1
+	POP	BC
+	SET	5,B
+	RST	20H
+	POP	BC
+	LD	A,(TCOLR)
+	LD	E,A
+	CALL	L0CA6
+L0BC2:	POP	BC
+	POP	DE
+	POP	HL
+	RET
+;***********************************************************************
+L0BC6:	LD	A,(PCFLAGS)
+	BIT	7,A
+	RST	28H
+	RET	Z
+	CPL
+	RET
+;***********************************************************************
+L0BCF:	INC	B
+	RET	NZ
+L0BD1:	INC	C
+	RES	3,C
+	RES	4,C
+	RES	5,C
+	RET
+;***********************************************************************
+L0BD9:	PUSH	AF
+	CALL	L0BEF
+	POP	AF
+	OUT	(C),A
+	RET
+;***********************************************************************
+;MCAL &C2 GET VRAM DATA
+;INPUT REGISTER		BC	= VRAM ADDRESS
+;OUTPUT REGISTER	A	= BYTE AT ABOVE ADDRESS
+ZVRIN:	LD	A,(PCFLAGS)
+	BIT	2,A
+	JP	Z,0028H		;JUMP IF NOT 80 COLUMN
+L0BE9:	CALL	L0BEF
+	IN	A,(C)
+	RET
+;***********************************************************************
+L0BEF:	IN	A,(4CH)
+	RRA
+	JR	NC,L0BEF
+L0BF4:	IN	A,(4CH)
+	RRA
+	JR	C,L0BF4
+	RET
+;***********************************************************************
+L0BFA:	PUSH	DE
+	RLCA
+	RLCA
+	PUSH	AF
+	AND	0FH
+	LD	D,A
+	POP	AF
+	AND	0F0H
+	LD	E,A
+	LD	A,(HL)
+	AND	B
+	OR	D
+	LD	(HL),A
+	SET	3,L
+	LD	A,(HL)
+	AND	C
+	OR	E
+	LD	(HL),A
+	RES	3,L
+	POP	DE
+	RET
+;***********************************************************************
+L0C13:	LD	BC,(CUSCOL)
+L0C17:	PUSH	AF
+	LD	H,00H
+	LD	L,B
+	LD	B,H
+	ADD	HL,HL
+	ADD	HL,HL
+	ADD	HL,HL
+	ADD	HL,HL
+	LD	D,H
+	LD	E,L
+	ADD	HL,HL
+	ADD	HL,HL
+	ADD	HL,DE
+	ADD	HL,BC
+	LD	DE,(LENGTH)
+	ADD	HL,DE
+	LD	A,H
+	AND	3FH
+	LD	H,A
+	LD	A,0EH
+	OUT	(48H),A
+	LD	C,49H
+	OUT	(C),H
+	INC	A
+	OUT	(48H),A
+	OUT	(C),L
+	LD	A,H
+	AND	07H
+	LD	B,L
+	LD	C,A
+	SET	6,C
+	POP	AF
+	RET
+;***********************************************************************
+;MCAL &D1 RETURN VRAM ADDRESSES RELATING TO CURRENT CURSOR POSITION
+;OUTPUT REGISTER BC=ASCII TEXT MAP ADDRESS
+;		DE=TABLE GENERATOR ADDRESS
+;		HL=SPRITE PATTERN/TEXT PATTERN TABLE
+ZSCURS:	LD	HL,PCFLAGS
+	BIT	2,(HL)
+	JR	NZ,L0C13
+L0C4C:	LD	BC,(CUSCOL)
+	LD	E,C
+L0C51:	PUSH	AF
+	LD	H,00H
+	LD	L,A
+	ADD	HL,HL
+	ADD	HL,HL
+	ADD	HL,HL
+	LD	A,18H
+	ADD	A,H
+	LD	H,A
+	PUSH	HL
+	LD	H,00H
+	LD	L,B
+	ADD	HL,HL
+	ADD	HL,HL
+	ADD	HL,HL
+	PUSH	HL
+	ADD	HL,HL
+	ADD	HL,HL
+	PUSH	HL
+	LD	B,00H
+	ADD	HL,BC
+	LD	BC,3800H
+	PUSH	HL
+	ADD	HL,BC
+	EX	(SP),HL
+	POP	BC
+	RST	28H
+	LD	L,A
+	ADD	HL,HL
+	ADD	HL,HL
+	ADD	HL,HL
+	POP	BC
+	EX	(SP),HL
+	EX	DE,HL
+	LD	H,00H
+	LD	A,(WIDTH)
+	CP	28H
+	JR	NZ,L0C83
+	ADD	HL,DE
+L0C83:	ADD	HL,BC
+	LD	BC,3C00H
+	ADD	HL,BC
+	POP	DE
+	EX	(SP),HL
+	POP	BC
+	POP	AF
+	RET
+;***********************************************************************
+L0C8D:	PUSH	AF
+	LD	A,C
+	OUT	(VDP+1),A
+	PUSH	AF
+	POP	AF
+	LD	A,B
+	OUT	(VDP+1),A
+	POP	AF
+	RET
+;***********************************************************************
+L0C98:	SET	6,A
+	OUT	(VDP+1),A
+	NOP
+	POP	AF
+	RET
+;***********************************************************************
+L0C9F:	LD	BC,1800H
+L0CA2:	LD	A,(TCOLR)
+	LD	E,A
+L0CA6:	LD	A,E
+	OUT	(VDP),A
+	DEC	BC
+	LD	A,B
+	OR	C
+	JR	NZ,L0CA6
+	RET
+;***********************************************************************
+L0CAF:	LD	E,00H
+	JR	L0CA6
+;***********************************************************************
+L0CB3:	LD	HL,PCFLAGS
+	BIT	2,(HL)
+	JR	NZ,L0CFD
+	LD	BC,3800H
+	RST	28H
+	PUSH	AF
+	ADD	A,20H
+	CALL	L0DB0
+	POP	AF
+	LD	H,00H
+	LD	L,A
+	ADD	HL,HL
+	ADD	HL,HL
+	ADD	HL,HL
+	LD	B,H
+	LD	C,L
+	PUSH	BC
+	CALL	L0D5D
+	RST	20H
+	LD	BC,0100H
+	CALL	L0CAF
+	POP	BC
+	SET	5,B
+	CALL	L0D5D
+	RST	20H
+	LD	BC,0100H
+	CALL	L0CA2
+	LD	HL,(WIDTH)
+	LD	H,00H
+	PUSH	HL
+	LD	DE,3C00H
+	ADD	HL,DE
+	EX	DE,HL
+	LD	B,H
+	LD	C,L
+	LD	HL,(LENGTH)
+	CALL	L0D68
+	POP	BC
+	LD	E,20H
+L0CFB:	JR	L0CA6
+;***********************************************************************
+L0CFD:	LD	HL,(LENGTH)
+	LD	BC,0050H
+	ADD	HL,BC
+	LD	A,H
+	AND	07H
+	LD	H,A
+	CALL	L0D30
+	LD	BC,1700H
+	CALL	L0C17
+	LD	E,80
+L0D13:	PUSH	BC
+	CALL	L0BE9
+	LD	D,A
+	LD	A,20H
+	CALL	L0BD9
+	LD	A,80
+	ADD	A,B
+	LD	B,A
+	CALL	C,L0BD1
+	LD	A,D
+	CALL	L0BD9
+	POP	BC
+	CALL	L0BCF
+	DEC	E
+	JR	NZ,L0D13
+	RET
+;***********************************************************************
+L0D30:	LD	A,0CH
+	OUT	(48H),A
+	LD	C,49H
+	OUT	(C),H
+	INC	A
+	OUT	(48H),A
+	OUT	(C),L
+	LD	(LENGTH),HL
+	RET
+;***********************************************************************
+;MCAL &D4 PROGRAM 25TH LINE
+ZST80:	LD	HL,PCFLAGS
+	BIT	2,(HL)
+	RET	Z		;RETURN IF NOT 80 COLUMN
+	LD	BC,1800H
+	PUSH	DE
+	CALL	L0C17
+	POP	DE
+	LD	H,80
+L0D51:	LD	A,(DE)
+	CALL	L0BD9
+	CALL	L0BCF
+	INC	DE
+	DEC	H
+	JR	NZ,L0D51
+	RET
+;***********************************************************************
+L0D5D:	CALL	L0D60
+L0D60:	LD	E,C
+	LD	A,B
+	ADD	A,8
+	LD	D,A
+	LD	HL,0100H
+L0D68:	PUSH	DE
+L0D69:	PUSH	BC
+	LD	B,D
+	LD	C,E
+	LD	DE,0020H
+	OR	A
+	SBC	HL,DE
+	PUSH	HL
+	ADD	HL,DE
+	JR	NC,L0D77
+	LD	E,L
+L0D77:	EX	AF,AF'
+	LD	D,E
+	PUSH	DE
+	CALL	L0D90
+	POP	DE
+	POP	HL
+	EX	(SP),HL
+	PUSH	BC
+	EX	(SP),HL
+	POP	BC
+	PUSH	HL
+	CALL	L0DA1
+	POP	DE
+	POP	HL
+	EX	AF,AF'
+	JR	Z,L0D8E
+	JR	NC,L0D69
+L0D8E:	POP	BC
+	RET
+;***********************************************************************
+L0D90:	CALL	L0C8D
+	PUSH	HL
+	LD	HL,VDPBUF
+L0D97:	IN	A,(VDP)
+	LD	(HL),A
+	INC	HL
+	INC	BC
+	DEC	D
+	JR	NZ,L0D97
+	POP	HL
+	RET
+;***********************************************************************
+L0DA1:	RST	20H
+	PUSH	HL
+	LD	HL,VDPBUF
+L0DA6:	LD	A,(HL)
+	OUT	(VDP),A
+	INC	HL
+	INC	BC
+	DEC	D
+	JR	NZ,L0DA6
+	POP	HL
+	RET
+;***********************************************************************
+L0DB0:	LD	BC,3800H
+	RST	20H
+	PUSH	AF
+	RLCA
+	RLCA
+	RLCA
+	LD	(LFB4E),A
+	POP	AF
+	LD	B,3
+L0DBE:	OUT	(VDP),A
+	INC	A
+	INC	C
+	JR	NZ,L0DBE
+	DJNZ	L0DBE
+	RET
+;***********************************************************************
+;MCAL &BE SYSTEM RESET
+ZSRSRS:	DEFB	0CFH,0BDH	;MCAL ZFDRST
+	LD	BC,3B00H
+	RST	20H
+	LD	BC,0080H
+	CALL	L0CAF
+	LD	BC,1800H
+	RST	20H
+	LD	B,01H
+	CALL	L0CAF
+	LD	HL,L116D
+	LD	A,7
+	LD	BC,0008H
+L0DE4:	OUTI
+	PUSH	AF
+	POP	AF
+	JR	NZ,L0DE4
+	DEC	A
+	JR	NZ,L0DE4
+	LD	HL,0000H
+	LD	(BRKVCT),HL
+	LD	(CLDVCT),HL
+	LD	(WRMVCT),HL
+	LD	HL,024D3H
+	LD	(RST38),HL
+	LD	A,1
+	OUT	(KBDMSK),A
+	OUT	(FIREMSK),A
+	OUT	(ADCMSK),A
+L0E07:	LD	A,0EH
+	RST	10H
+	RET
+;***********************************************************************
+;MCAL &D3 INITIALISE 80 COLUMN
+Z80INIT:	CALL	L0E31
+	JR	NZ,L0E07
+	IN	A,(4CH)
+	BIT	2,A
+	LD	HL,P60HZ
+	JR	NZ,L0E1C
+	LD	HL,P50HZ
+L0E1C:	LD	BC,01049H
+	XOR	A
+L0E20:	OUT	(48H),A
+	INC	A
+	OUTI
+	JR	NZ,L0E20
+	LD	A,10H
+	RST	10H
+	IN	A,(4CH)
+	BIT	1,A
+	JR	Z,L0E07
+	RET
+;***********************************************************************
+L0E31:	PUSH	BC
+	LD	BC,0040H
+	IN	A,(C)
+	CPL
+	OUT	(C),A
+	LD	D,A
+	IN	A,(C)
+	CP	D
+	POP	BC
+	RET
+;***********************************************************************
+;80 COLUMN 60Hz CONTROL PARAMETERS
+P60HZ:	DEFB    07EH		;HORIZONTAL TOTAL
+	DEFB    050H		;HORIZONTAL DISPLAYED
+	DEFB    061H		;HORIZONTAL SYNC POSITION
+	DEFB    038H		;SYNC WIDTH
+	DEFB    01AH		;VERTICAL TOTAL
+	DEFB    013H		;VERTICAL TOTAL ADJUST
+	DEFB    019H		;VERTICAL DISPLAYED
+	DEFB    01AH		;VERTICAL SYNC POSITION
+	DEFB    00H		;NON INTERLACE
+	DEFB    08H		;MAX SCAN LINE ADDRESS
+	DEFB    020H		;CURSOR START
+	DEFB    08H		;CURSOR END
+	DEFB    00H		;START ADDRESS (H)
+	DEFB    00H		;START ADDRESS (L)
+	DEFB    00H		;CURSOR (H)
+	DEFB	00H		;CURSOR (L)		 
+;80 COLUMN 50Hz CONTROL PARAMETERS
+P50HZ:	DEFB    07FH		;HORIZONTAL TOTAL        
+	DEFB    050H            ;HORIZONTAL DISPLAYED    
+	DEFB    062H            ;HORIZONTAL SYNC POSITION
+	DEFB    038H            ;SYNC WIDTH              
+	DEFB    01EH            ;VERTICAL TOTAL          
+	DEFB    02H             ;VERTICAL TOTAL ADJUST   
+	DEFB    019H            ;VERTICAL DISPLAYED      
+	DEFB    01BH            ;VERTICAL SYNC POSITION  
+	DEFB    00H             ;NON INTERLACE           
+	DEFB    09H             ;MAX SCAN LINE ADDRESS   
+	DEFB    020H            ;CURSOR START            
+	DEFB    09H             ;CURSOR END              
+	DEFB    00H             ;START ADDRESS (H)       
+	DEFB    00H             ;START ADDRESS (L)       
+	DEFB    00H             ;CURSOR (H)              
+	DEFB	00H             ;CURSOR (L)		 
+;***********************************************************************
+;MCAL &CE MULTIPLY
+;INPUT REGISTER		BC,DE	= BYTES TO ULTIPLY
+;OUTPUT REGISTER	DEHL	= RESULT (DE = MSB)
+ZIMULT:	LD	A,B
+	LD	HL,0000H
+	LD	B,10H
+	RRA
+	RR	C
+L0E69:	JR	NC,L0E6C
+	ADD	HL,DE
+L0E6C:	RR	H
+	RR	L
+	RRA
+	RR	C
+	DJNZ	L0E69
+	EX	DE,HL
+	LD	H,A
+	LD	L,C
+	LD	A,D
+	OR	E
+	RET
+;***********************************************************************
+;MCAL &BF OUTPUT LOGO
+ZLOGO:	RST	18H
+	DEFB	0CH,'           **'
+	DEFB	'*  EINSTEIN  ***'
+	DEFB	CR,LF+80H
+	RET
+;***********************************************************************
+;MCAL &A9 OUTPUT 4 HEX DIGITS IN 'HL'
+ZPR4HX:	LD	A,H
+	DEFB	0CFH,0ABH	;MCAL ZPR2HX
+	LD	A,L
+;MCAL &AA OUTPUT 2 HEX DIGITS IN 'A' - FOLLOWED BY SPACE
+ZP2HXZ:	DEFB	0CFH,0ABH	;MCAL ZPR2HX
+	JR	ZSPACE
+;***********************************************************************
+;MCAL &AB OUTPUT 2 HEX DIGITS IN 'A' - NO SPACE
+ZPR2HX:	PUSH	AF
+	RRCA
+	RRCA
+	RRCA
+	RRCA
+	CALL	L0EAE
+	POP	AF
+L0EAE:	AND	0FH
+	ADD	A,90H
+	DAA
+	ADC	A,40H
+	DAA
+	RST	10H
+	OR	A
+	RET
+;***********************************************************************
+L0EB9:	EX	DE,HL
+	DEFB	0CFH,0B1H	;MCAL ZRDMEM
+	EX	DE,HL
+	INC	DE
+	SUB	30H
+	CP	0AH
+	CCF
+	RET	NC
+	ADD	A,30H
+	AND	5FH
+	SUB	37H
+	CP	10H
+	CCF
+	RET	NC
+	LD	A,00H
+	RET
+;***********************************************************************
+;MCAL &AD GET HEX NUMBER FROM TEXT - 2 DIGITS
+;INPUT REGISTER		DE	= POINTER TO LOCATION
+;OUTPUT REGISTER	A	= HEX NUMBER
+ZFC2HX:	PUSH	BC
+	CALL	L0EB9
+	JR	C,L0EE2
+	RLCA
+	RLCA
+	RLCA
+	RLCA
+	LD	C,A
+	CALL	L0EB9
+	JR	C,L0EE2
+	OR	C
+L0EE2:	POP	BC
+	RET
+;***********************************************************************
+;MCAL &AC GET HEX NUMBER FROM TEXT - 4 DIGITS
+;INPUT REGISTER		DE	= POINTER TO LOCATION
+;OUTPUT REGISTER	HL	= HEX NUMBER
+ZFC4HX:	LD	A,4
+	PUSH	BC
+	LD	B,A
+	XOR	A
+	LD	H,A
+	LD	L,A
+L0EEB:	CALL	L0EB9
+	JR	C,L0EF9
+	ADD	HL,HL
+	ADD	HL,HL
+	ADD	HL,HL
+	ADD	HL,HL
+	OR	L
+	LD	L,A
+	DJNZ	L0EEB
+	INC	DE
+L0EF9:	DEC	DE
+	POP	BC
+	RET
+;***********************************************************************
+L0EFC:	INC	DE
+;MCAL &B0 GET RAM BYTE
+;INPUT REGISTER		DE	= RAM POINTER (RAM>7FFFH or ROM<8000H)
+;OUTPUT REGISTER	A	= BYTE
+ZIGBLK:	LD	A,(DE)
+	CP	20H
+	JR	Z,L0EFC
+	CP	2CH
+	JR	Z,L0EFC
+	OR	A
+	RET
+;***********************************************************************
+L0F08:	EX	DE,HL
+L0F09:	LD	E,(HL)
+	INC	HL
+	LD	D,(HL)
+	INC	HL
+	EX	DE,HL
+	RET
+;***********************************************************************
+;MCAL &A7 OUTPUT CR,LF IF NOT AT COLUMN ZERO
+ZCRLFZ:	LD	A,(CUSCOL)
+	OR	A
+	RET	Z
+;MCAL &A6 OUTPUT CR,LF
+ZCRLF:	RST	18H		
+	DEFB	CR,LF+80H
+	RET
+;***********************************************************************
+;MCAL &A8 OUTPUT 1 SPACE
+ZSPACE:	LD	A,20H
+;MCAL &9E SCREEN CHARACTER
+;INPUT REGISTER		A	= CHARACTER TO OUTPUT
+ZOUTC:	PUSH	HL
+	PUSH	DE
+	PUSH	BC
+	PUSH	AF
+	CALL	L0896
+	POP	AF
+	POP	BC
+	POP	DE
+	POP	HL
+	RET
+;***********************************************************************
+;MCAL &CF OUTPUT MESSAGE
+ZPRM:	PUSH	HL
+	LD	HL,(TEMPPC)
+	DEFB	0CFH,0B1H	;MCAL ZRDMEM
+	LD	E,A
+	INC	HL
+	DEFB	0CFH,0B1H	;MCAL ZRDMEM
+	LD	D,A
+	EX	DE,HL
+L0F32:	DEFB	0CFH,0B1H	;MCAL ZRDMEM
+	CALL	L0F40
+	JR	Z,L0F32
+	EX	DE,HL
+	LD	(HL),D
+	DEC	HL
+	LD	(HL),E
+	POP	HL
+L0F3E:	RET
+;***********************************************************************
+L0F3F:	LD	A,(HL)
+L0F40:	BIT	7,A
+	RES	7,A
+	RST	10H
+	INC	HL
+	RET
+;***********************************************************************
+L0F47:	LD	A,C
+;MCAL &A0 SERIAL OUTPUT
+ZSLOUT:	PUSH	AF
+L0F49:	IN	A,(PCI+1)
+	RRA
+	JR	NC,L0F49
+	POP	AF
+	OUT	(PCI),A
+	RET
+;***********************************************************************
+;MCAL &A1 SERIAL INPUT
+ZSRLIN:	IN	A,(PCI+1)
+	RRA
+	RRA
+	JR	NC,ZSRLIN
+	IN	A,(PCI)
+	RET
+;***********************************************************************
+L0F5B:	LD	A,C
+;MCAL &9F OUTPUT CHARACTER TO PRINTER
+ZPOUT:	PUSH	HL
+	LD	HL,IFLAG
+L0F60:	BIT	0,(HL)
+	JR	NZ,L0F60
+	OUT	(PIA),A
+	SET	0,(HL)
+	POP	HL
+	RET
+;***********************************************************************
+;MCAL &B4 OUTPUT TO PSG
+;INPUT REGISTER		C	= PSG REGISTER
+;			B	= VALUE
+ZMOUT:	LD	A,C
+	OUT	(PSG_SEL),A
+	LD	A,B
+	OUT	(PSG_WR),A
+	RET
+;***********************************************************************
+;OUTPUT BEEP
+CTRLG:	LD	BC,8E00H
+	DEFB	0CFH,0B4H	;MCAL ZMOUT
+	LD	BC,0001H
+	DEFB	0CFH,0B4H	;MCAL ZMOUT
+	LD	BC,0A08H
+	DEFB	0CFH,0B4H	;MCAL ZMOUT
+	LD	BC,7E07H
+	DEFB	0CFH,0B4H	;MCAL ZMOUT
+	LD	BC,3A2EH
+L0F88:	DEC	BC
+	LD	A,B
+	OR	C
+	JR	NZ,L0F88
+	LD	BC,0008H
+	DEFB	0CFH,0B4H	;MCAL ZMOUT
+
+;MCAL &C0 SET PSG REGISTER 7 TO 7F AND ALL OTHER REGISTERS TO 00
+;INPUT REGISTER		NONE
+ZPINIT:	LD	BC,7F07H
+	DEFB	0CFH,0B4H	;MCAL ZMOUT
+L0F97:	LD	E,0FFH
+L0F99:	LD	A,0EH
+	OUT	(PSG_SEL),A
+	LD	A,E
+	CPL
+	OUT	(PSG_WR),A
+	RET
+;***********************************************************************
+L0FA2:	CALL	L0F99
+L0FA5:	LD	A,0FH
+	OUT	(PSG_SEL),A
+	IN	A,(PSG_RD)
+	CPL
+	OR	A
+	RET
+;***********************************************************************
+;MCAL &BC SET INTERRUPTS FOR RTC
+ZZTIME:	LD	C,2AH
+	LD	A,3FH
+	LD	B,7DH
+	CALL	L0FBC
+	INC	C
+	LD	A,0DFH
+	LD	B,7DH
+L0FBC:	OUT	(C),A
+	NOP
+	OUT	(C),B
+	RET
+;***********************************************************************
+L0FC2:	LD	(TEMPHL),HL
+	POP	HL
+	PUSH	AF
+	LD	A,(HL)
+	INC	HL
+	EX	(SP),HL
+L0FCA:	PUSH	HL
+	BIT	7,A
+	RES	7,A
+	JR	Z,L0FE4
+	LD	HL,(MOSITP)
+	ADD	A,A
+	ADD	A,L
+	LD	L,A
+	JR	NC,L0FDA
+	INC	H
+L0FDA:	LD	A,(HL)
+	INC	HL
+	LD	H,(HL)
+	LD	L,A
+	POP	AF
+	PUSH	HL
+	LD	HL,(TEMPHL)
+	RET
+;***********************************************************************
+L0FE4:	LD	HL,(MOSLOW)
+	JP	(HL)
+;***********************************************************************
+
+;VDP PARAMETERS
+L0FE8:	DEFB    02H		;OPTION CONTROL BITS
+	DEFB    0C0H		;OPTION CONTROL BITS
+	DEFB    0EH		;PATTERN NAME TABLE
+	DEFB    0FFH		;PATTERN COLOUR TABLE
+	DEFB    03H		;PATTERN GENERATOR TABLE
+	DEFB    076H		;SPRITE ATTRIBUTE TABLE
+	DEFB    03H		;SPRITE PATTERN GENERATOR
+	DEFB	0F4H		;COLOUR
+;***********************************************************************
+;LOAD FB00 TO FB45
+L0FF0:	DEFW	0FC4EH,0FC4EH,0FC4EH,0FC47H
+	DEFW	0FC4EH,0FC4EH,0FC4EH,0FC4EH
+	DEFW	0FC84H,0FC4EH
+	DEFB	0D3H,024H,07EH,0D3H
+	DEFB	024H,0C9H,0D3H,024H
+	DEFB	0EDH,0B0H,0D3H,024H
+	DEFB	0C9H,0D3H,024H,0EDH
+	DEFB	0B8H,0D3H,024H,0C9H
+	DEFB	0D3H,024H,0CDH,0CAH
+	DEFB	00FH,0D3H,024H,0C9H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,000H,002H,0C0H
+	DEFB	0F0H,0F0H,082H,002H
+	DEFB	07DH,000H,080H,07FH
+	DEFB	03EH,020H,0A0H,010H
+	DEFB	002H,001H
+;***********************************************************************
+;LOAD 0000 TO 000A
+L1036:	DEFB	0CFH,09AH,0FFH,000H
+	DEFB	000H,0FFH,0FFH,0FFH
+	DEFB	0C3H,022H,0FCH
+;***********************************************************************
+;LOAD FC09 TO FC8C
+L1041:	DEFB	03AH,038H,000H,0B7H
+	DEFB	0C8H,018H,00FH,03AH
+	DEFB	038H,000H,0B7H,0C0H
+	DEFB	018H,008H,0C5H,04FH
+	DEFB	03AH,038H,000H,0B9H
+	DEFB	0C1H,0C8H,0D3H,024H
+	DEFB	0C9H,022H,079H,0FBH
+	DEFB	0E1H,0F5H,07EH,023H
+	DEFB	0E3H,0EDH,073H,07BH
+	DEFB	0FBH,0E5H,0B7H,021H
+	DEFB	000H,0FBH,0EDH,072H
+	DEFB	0E1H,038H,003H,031H
+	DEFB	0FFH,0FCH,0D3H,024H
+	DEFB	0CDH,0CAH,00FH,0D3H
+	DEFB	024H,0EDH,07BH,07BH
+	DEFB	0FBH,0C9H,0E5H,0F5H
+	DEFB	0CDH,051H,0FCH,0F1H
+	DEFB	0E1H,0FBH,0EDH,04DH
+	DEFB	021H,091H,0FBH,03EH
+	DEFB	039H,0CDH,07DH,0FCH
+	DEFB	0D0H,03EH,035H,0CDH
+	DEFB	07DH,0FCH,0D0H,03EH
+	DEFB	039H,0CDH,07DH,0FCH
+	DEFB	0D0H,03EH,035H,0CDH
+	DEFB	07DH,0FCH,0D0H,02BH
+	DEFB	03EH,032H,0BEH,023H
+	DEFB	03EH,039H,020H,002H
+	DEFB	03EH,033H,0CDH,07DH
+	DEFB	0FCH,0D0H,03EH,032H
+	DEFB	034H,0BEH,0D0H,036H
+	DEFB	030H,02BH,0C9H,0E5H
+	DEFB	021H,092H,0FBH,0CBH
+	DEFB	086H,0E1H,018H,0C1H
+;***********************************************************************
+;KBD CHARS (NORM,SHIFT,CONT)
+L10C5:	DEFB	069H,06FH,070H,05BH
+	DEFB	05FH,00AH,07CH,030H
+	DEFB	049H,04FH,050H,07BH
+	DEFB	060H,00BH,05CH,040H
+	DEFB	009H,00FH,010H,01BH
+	DEFB	01FH,00AH,01CH,030H
+	DEFB	06BH,06CH,03BH,03AH
+	DEFB	05DH,004H,039H,085H
+	DEFB	04BH,04CH,02BH,02AH
+	DEFB	07DH,008H,029H,085H
+	DEFB	00BH,00CH,03BH,03AH
+	DEFB	01DH,004H,039H,085H
+	DEFB	02CH,02EH,02FH,038H
+	DEFB	019H,03DH,05EH,084H
+	DEFB	03CH,03EH,03FH,028H
+	DEFB	01AH,02DH,07EH,084H
+	DEFB	02CH,02EH,02FH,038H
+	DEFB	006H,03DH,01EH,084H
+	DEFB	037H,036H,035H,034H
+	DEFB	033H,032H,031H,083H
+	DEFB	027H,026H,025H,024H
+	DEFB	023H,022H,021H,083H
+	DEFB	037H,036H,035H,034H
+	DEFB	033H,032H,031H,083H
+	DEFB	075H,079H,074H,072H
+	DEFB	065H,077H,071H,082H
+	DEFB	055H,059H,054H,052H
+	DEFB	045H,057H,051H,082H
+	DEFB	015H,019H,014H,012H
+	DEFB	005H,017H,011H,082H
+	DEFB	06AH,068H,067H,066H
+	DEFB	064H,073H,061H,081H
+	DEFB	04AH,048H,047H,046H
+	DEFB	044H,053H,041H,081H
+	DEFB	00AH,008H,007H,006H
+	DEFB	004H,013H,001H,081H
+	DEFB	06DH,06EH,062H,076H
+	DEFB	063H,078H,07AH,086H
+	DEFB	04DH,04EH,042H,056H
+	DEFB	043H,058H,05AH,086H
+	DEFB	00DH,00EH,002H,016H
+	DEFB	003H,018H,01AH,086H
+;***********************************************************************
+;VDP CHARACTER SET
+L116D:	DEFB	000H,000H,000H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,010H,010H,010H
+	DEFB	010H,000H,010H,000H
+	DEFB	000H,028H,028H,028H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,028H,07CH,028H
+	DEFB	028H,07CH,028H,000H
+	DEFB	000H,010H,03CH,050H
+	DEFB	038H,014H,078H,010H
+	DEFB	000H,060H,064H,008H
+	DEFB	010H,02CH,04CH,000H
+	DEFB	000H,020H,050H,020H
+	DEFB	054H,048H,034H,000H
+	DEFB	000H,010H,010H,010H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,008H,010H,010H
+	DEFB	010H,010H,008H,000H
+	DEFB	000H,020H,010H,010H
+	DEFB	010H,010H,020H,000H
+	DEFB	000H,010H,054H,038H
+	DEFB	010H,038H,054H,010H
+	DEFB	000H,000H,010H,010H
+	DEFB	07CH,010H,010H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,010H,010H,020H
+	DEFB	000H,000H,000H,000H
+	DEFB	038H,000H,000H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,000H,010H,000H
+	DEFB	000H,000H,004H,008H
+	DEFB	010H,020H,040H,000H
+	DEFB	000H,010H,028H,044H
+	DEFB	044H,028H,010H,000H
+	DEFB	000H,010H,030H,010H
+	DEFB	010H,010H,038H,000H
+	DEFB	000H,038H,044H,004H
+	DEFB	038H,040H,07CH,000H
+	DEFB	000H,038H,044H,018H
+	DEFB	004H,044H,038H,000H
+	DEFB	000H,018H,028H,048H
+	DEFB	07CH,008H,008H,000H
+	DEFB	000H,07CH,040H,078H
+	DEFB	004H,044H,038H,000H
+	DEFB	000H,038H,040H,078H
+	DEFB	044H,044H,038H,000H
+	DEFB	000H,07CH,004H,008H
+	DEFB	010H,020H,020H,000H
+	DEFB	000H,038H,044H,038H
+	DEFB	044H,044H,038H,000H
+	DEFB	000H,038H,044H,038H
+	DEFB	004H,008H,010H,000H
+	DEFB	000H,000H,000H,010H
+	DEFB	000H,010H,000H,000H
+	DEFB	000H,000H,000H,010H
+	DEFB	000H,010H,010H,020H
+	DEFB	000H,000H,010H,020H
+	DEFB	040H,020H,010H,000H
+	DEFB	000H,000H,000H,07CH
+	DEFB	000H,07CH,000H,000H
+	DEFB	000H,000H,010H,008H
+	DEFB	004H,008H,010H,000H
+	DEFB	000H,038H,044H,008H
+	DEFB	010H,010H,000H,010H
+	DEFB	000H,038H,044H,054H
+	DEFB	05CH,040H,03CH,000H
+	DEFB	000H,010H,028H,044H
+	DEFB	07CH,044H,044H,000H
+	DEFB	000H,078H,044H,078H
+	DEFB	044H,044H,078H,000H
+	DEFB	000H,038H,044H,040H
+	DEFB	040H,044H,038H,000H
+	DEFB	000H,078H,044H,044H
+	DEFB	044H,044H,078H,000H
+	DEFB	000H,07CH,040H,078H
+	DEFB	040H,040H,07CH,000H
+	DEFB	000H,07CH,040H,078H
+	DEFB	040H,040H,040H,000H
+	DEFB	000H,038H,044H,040H
+	DEFB	04CH,044H,038H,000H
+	DEFB	000H,044H,044H,07CH
+	DEFB	044H,044H,044H,000H
+	DEFB	000H,07CH,010H,010H
+	DEFB	010H,010H,07CH,000H
+	DEFB	000H,03CH,008H,008H
+	DEFB	008H,048H,030H,000H
+	DEFB	000H,044H,048H,050H
+	DEFB	070H,048H,044H,000H
+	DEFB	000H,040H,040H,040H
+	DEFB	040H,040H,07CH,000H
+	DEFB	000H,044H,06CH,054H
+	DEFB	054H,044H,044H,000H
+	DEFB	000H,044H,064H,054H
+	DEFB	04CH,044H,044H,000H
+	DEFB	000H,038H,044H,044H
+	DEFB	044H,044H,038H,000H
+	DEFB	000H,078H,044H,078H
+	DEFB	040H,040H,040H,000H
+	DEFB	000H,038H,044H,044H
+	DEFB	054H,048H,034H,000H
+	DEFB	000H,078H,044H,078H
+	DEFB	050H,048H,044H,000H
+	DEFB	000H,038H,040H,038H
+	DEFB	004H,004H,038H,000H
+	DEFB	000H,07CH,010H,010H
+	DEFB	010H,010H,010H,000H
+	DEFB	000H,044H,044H,044H
+	DEFB	044H,044H,038H,000H
+	DEFB	000H,044H,044H,044H
+	DEFB	028H,028H,010H,000H
+	DEFB	000H,044H,044H,054H
+	DEFB	054H,054H,028H,000H
+	DEFB	000H,044H,028H,010H
+	DEFB	010H,028H,044H,000H
+	DEFB	000H,044H,044H,028H
+	DEFB	010H,010H,010H,000H
+	DEFB	000H,07CH,008H,010H
+	DEFB	020H,040H,07CH,000H
+	DEFB	000H,000H,010H,020H
+	DEFB	07CH,020H,010H,000H
+	DEFB	000H,040H,040H,058H
+	DEFB	004H,018H,01CH,000H
+	DEFB	000H,000H,010H,008H
+	DEFB	07CH,008H,010H,000H
+	DEFB	000H,010H,038H,054H
+	DEFB	010H,010H,010H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,000H,000H,07CH
+	DEFB	000H,018H,024H,020H
+	DEFB	070H,020H,07CH,000H
+	DEFB	000H,000H,030H,008H
+	DEFB	038H,048H,034H,000H
+	DEFB	000H,040H,040H,070H
+	DEFB	048H,048H,070H,000H
+	DEFB	000H,000H,030H,048H
+	DEFB	040H,048H,030H,000H
+	DEFB	000H,008H,008H,038H
+	DEFB	048H,048H,038H,000H
+	DEFB	000H,000H,030H,048H
+	DEFB	070H,040H,038H,000H
+	DEFB	000H,010H,028H,020H
+	DEFB	078H,020H,020H,000H
+	DEFB	000H,000H,030H,048H
+	DEFB	038H,008H,048H,030H
+	DEFB	000H,040H,040H,070H
+	DEFB	048H,048H,048H,000H
+	DEFB	000H,010H,000H,030H
+	DEFB	010H,010H,038H,000H
+	DEFB	000H,008H,000H,008H
+	DEFB	008H,008H,048H,030H
+	DEFB	000H,040H,048H,050H
+	DEFB	060H,050H,048H,000H
+	DEFB	000H,030H,010H,010H
+	DEFB	010H,010H,038H,000H
+	DEFB	000H,000H,068H,054H
+	DEFB	054H,054H,054H,000H
+	DEFB	000H,000H,050H,068H
+	DEFB	048H,048H,048H,000H
+	DEFB	000H,000H,030H,048H
+	DEFB	048H,048H,030H,000H
+	DEFB	000H,000H,030H,048H
+	DEFB	048H,070H,040H,040H
+	DEFB	000H,000H,030H,048H
+	DEFB	048H,038H,00CH,008H
+	DEFB	000H,000H,050H,068H
+	DEFB	040H,040H,040H,000H
+	DEFB	000H,000H,038H,040H
+	DEFB	030H,008H,070H,000H
+	DEFB	000H,020H,070H,020H
+	DEFB	020H,028H,010H,000H
+	DEFB	000H,000H,048H,048H
+	DEFB	048H,058H,028H,000H
+	DEFB	000H,000H,048H,048H
+	DEFB	048H,030H,030H,000H
+	DEFB	000H,000H,054H,054H
+	DEFB	054H,054H,028H,000H
+	DEFB	000H,000H,044H,028H
+	DEFB	010H,028H,044H,000H
+	DEFB	000H,000H,048H,048H
+	DEFB	038H,008H,048H,030H
+	DEFB	000H,000H,078H,010H
+	DEFB	020H,040H,078H,000H
+	DEFB	000H,040H,040H,048H
+	DEFB	018H,03CH,008H,000H
+	DEFB	000H,028H,028H,028H
+	DEFB	028H,028H,028H,000H
+	DEFB	000H,070H,020H,010H
+	DEFB	068H,018H,03CH,008H
+	DEFB	000H,000H,010H,000H
+	DEFB	07CH,000H,010H,000H
+	DEFB	07CH,07CH,07CH,07CH
+	DEFB	07CH,07CH,07CH,07CH
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	060H,080H,040H,020H
+	DEFB	0D8H,014H,014H,018H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,010H,0F8H,004H
+	DEFB	0F8H,010H,000H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,044H,024H,0F4H
+	DEFB	024H,044H,000H,000H
+	DEFB	080H,0E0H,0A0H,0E0H
+	DEFB	010H,010H,010H,01CH
+	DEFB	000H,020H,07CH,080H
+	DEFB	07CH,020H,000H,000H
+	DEFB	080H,0C0H,0A0H,0A0H
+	DEFB	01CH,008H,008H,008H
+	DEFB	050H,050H,050H,0D8H
+	DEFB	050H,020H,000H,000H
+	DEFB	020H,050H,0D8H,050H
+	DEFB	050H,050H,000H,000H
+	DEFB	0E0H,080H,0C0H,080H
+	DEFB	038H,020H,030H,020H
+	DEFB	0E0H,080H,080H,0E0H
+	DEFB	01CH,014H,018H,014H
+	DEFB	080H,0C0H,0E0H,040H
+	DEFB	01CH,014H,014H,01CH
+	DEFB	0E0H,020H,040H,020H
+	DEFB	0ECH,004H,008H,00CH
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	0E0H,080H,080H,0E0H
+	DEFB	01CH,014H,014H,01CH
+	DEFB	0E0H,0A0H,0E0H,080H
+	DEFB	09CH,014H,014H,01CH
+	DEFB	0E0H,0A0H,0E0H,080H
+	DEFB	09CH,010H,018H,010H
+	DEFB	0E0H,080H,080H,0E0H
+	DEFB	01CH,010H,018H,010H
+	DEFB	0C0H,0A0H,0A0H,0C0H
+	DEFB	010H,010H,010H,01CH
+	DEFB	0C0H,0A0H,0A0H,0CCH
+	DEFB	010H,008H,004H,018H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	0C0H,0A0H,0A0H,0C0H
+	DEFB	01CH,014H,018H,014H
+	DEFB	000H,088H,090H,0BCH
+	DEFB	090H,088H,000H,000H
+	DEFB	020H,0A8H,070H,020H
+	DEFB	000H,0D8H,0D8H,000H
+	DEFB	0E0H,080H,0C0H,080H
+	DEFB	0ECH,008H,008H,00CH
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,0F0H,0C0H,0A0H
+	DEFB	090H,008H,004H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	0FFH,0FFH,0FFH,0FFH
+	DEFB	0FFH,0FFH,0FFH,0FFH
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,000H,000H,0FFH
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,000H,0FFH,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,0FFH,000H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	0FFH,000H,000H,000H
+	DEFB	001H,001H,001H,001H
+	DEFB	001H,001H,001H,001H
+	DEFB	002H,002H,002H,002H
+	DEFB	002H,002H,002H,002H
+	DEFB	004H,004H,004H,004H
+	DEFB	004H,004H,004H,004H
+	DEFB	008H,008H,008H,008H
+	DEFB	008H,008H,008H,008H
+	DEFB	000H,000H,000H,0F0H
+	DEFB	010H,010H,010H,010H
+	DEFB	001H,003H,004H,00CH
+	DEFB	013H,033H,04CH,0CCH
+	DEFB	000H,000H,000H,000H
+	DEFB	033H,033H,0CCH,0CCH
+	DEFB	000H,000H,000H,003H
+	DEFB	004H,008H,010H,010H
+	DEFB	0FFH,080H,080H,080H
+	DEFB	080H,080H,080H,080H
+	DEFB	010H,010H,020H,0C0H
+	DEFB	000H,000H,000H,000H
+	DEFB	008H,008H,004H,003H
+	DEFB	000H,000H,000H,000H
+	DEFB	008H,008H,008H,00FH
+	DEFB	000H,000H,000H,000H
+	DEFB	0FFH,000H,000H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,0FFH,000H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,000H,0FFH,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,000H,000H,0FFH
+	DEFB	000H,000H,000H,000H
+	DEFB	080H,080H,080H,080H
+	DEFB	080H,080H,080H,080H
+	DEFB	040H,040H,040H,040H
+	DEFB	040H,040H,040H,040H
+	DEFB	020H,020H,020H,020H
+	DEFB	020H,020H,020H,020H
+	DEFB	010H,010H,010H,010H
+	DEFB	010H,010H,010H,010H
+	DEFB	010H,010H,010H,0F0H
+	DEFB	000H,000H,000H,000H
+	DEFB	033H,032H,0CCH,0C8H
+	DEFB	030H,020H,0C0H,080H
+	DEFB	033H,033H,0CCH,0CCH
+	DEFB	000H,000H,000H,000H
+	DEFB	010H,010H,008H,004H
+	DEFB	003H,000H,000H,000H
+	DEFB	080H,080H,080H,080H
+	DEFB	080H,080H,080H,0FFH
+	DEFB	000H,000H,000H,000H
+	DEFB	0C0H,020H,010H,010H
+	DEFB	000H,000H,000H,000H
+	DEFB	003H,004H,008H,008H
+	DEFB	000H,000H,000H,000H
+	DEFB	00FH,008H,008H,008H
+	DEFB	003H,003H,003H,003H
+	DEFB	003H,003H,003H,003H
+	DEFB	080H,080H,040H,040H
+	DEFB	020H,010H,00CH,003H
+	DEFB	001H,001H,002H,002H
+	DEFB	002H,004H,004H,008H
+	DEFB	00FH,00FH,00FH,00FH
+	DEFB	00FH,00FH,00FH,00FH
+	DEFB	002H,002H,002H,002H
+	DEFB	002H,002H,007H,002H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,000H,0FFH,0FFH
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,0FFH,0FFH,0FFH
+	DEFB	000H,000H,000H,000H
+	DEFB	0FFH,0FFH,0FFH,0FFH
+	DEFB	0C0H,030H,00CH,003H
+	DEFB	000H,000H,000H,000H
+	DEFB	00FH,00FH,00FH,00FH
+	DEFB	0F0H,0F0H,0F0H,0F0H
+	DEFB	033H,033H,0CCH,0CCH
+	DEFB	033H,033H,0CCH,0CCH
+	DEFB	003H,003H,00CH,00CH
+	DEFB	003H,003H,00CH,00CH
+	DEFB	008H,008H,010H,020H
+	DEFB	0C0H,000H,000H,000H
+	DEFB	001H,001H,002H,002H
+	DEFB	004H,008H,030H,0C0H
+	DEFB	000H,066H,066H,018H
+	DEFB	018H,066H,066H,000H
+	DEFB	044H,044H,044H,044H
+	DEFB	044H,044H,044H,044H
+	DEFB	010H,010H,010H,0F0H
+	DEFB	010H,010H,010H,010H
+	DEFB	002H,002H,002H,002H
+	DEFB	002H,002H,0FFH,002H
+	DEFB	007H,007H,007H,007H
+	DEFB	007H,007H,007H,007H
+	DEFB	080H,080H,040H,040H
+	DEFB	020H,020H,010H,010H
+	DEFB	000H,000H,000H,000H
+	DEFB	003H,00CH,030H,0C0H
+	DEFB	008H,008H,004H,004H
+	DEFB	002H,002H,001H,001H
+	DEFB	010H,010H,010H,0FFH
+	DEFB	000H,000H,000H,000H
+	DEFB	0C0H,038H,006H,001H
+	DEFB	000H,000H,000H,000H
+	DEFB	001H,001H,002H,002H
+	DEFB	004H,004H,008H,008H
+	DEFB	003H,01CH,060H,080H
+	DEFB	000H,000H,000H,000H
+	DEFB	044H,0FFH,044H,044H
+	DEFB	044H,0FFH,044H,044H
+	DEFB	080H,040H,020H,010H
+	DEFB	008H,004H,002H,001H
+	DEFB	033H,033H,00CH,00CH
+	DEFB	003H,003H,000H,000H
+	DEFB	001H,001H,001H,001H
+	DEFB	001H,001H,001H,0FFH
+	DEFB	011H,022H,044H,088H
+	DEFB	011H,022H,044H,088H
+	DEFB	088H,044H,022H,011H
+	DEFB	088H,044H,022H,011H
+	DEFB	0C0H,0C0H,0C0H,0C0H
+	DEFB	0C0H,0C0H,0C0H,0C0H
+	DEFB	003H,00CH,010H,020H
+	DEFB	040H,040H,080H,080H
+	DEFB	080H,080H,040H,040H
+	DEFB	040H,020H,020H,010H
+	DEFB	0F0H,0F0H,0F0H,0F0H
+	DEFB	0F0H,0F0H,0F0H,0F0H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,002H,0FFH,002H
+	DEFB	0FFH,0FFH,000H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	0FFH,0FFH,0FFH,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	0FFH,0FFH,0FFH,0FFH
+	DEFB	000H,000H,000H,000H
+	DEFB	003H,00CH,030H,0C0H
+	DEFB	000H,000H,000H,000H
+	DEFB	0F0H,0F0H,0F0H,0F0H
+	DEFB	00FH,00FH,00FH,00FH
+	DEFB	0CCH,0CCH,033H,033H
+	DEFB	0CCH,0CCH,033H,033H
+	DEFB	030H,030H,0C0H,0C0H
+	DEFB	030H,030H,0C0H,0C0H
+	DEFB	000H,000H,000H,0C0H
+	DEFB	020H,010H,008H,008H
+	DEFB	0C0H,030H,008H,004H
+	DEFB	002H,002H,001H,001H
+	DEFB	081H,042H,024H,018H
+	DEFB	018H,024H,042H,081H
+	DEFB	000H,0FFH,000H,000H
+	DEFB	000H,0FFH,000H,000H
+	DEFB	010H,010H,010H,01FH
+	DEFB	010H,010H,010H,010H
+	DEFB	010H,010H,010H,0FFH
+	DEFB	010H,010H,010H,010H
+	DEFB	0E0H,0E0H,0E0H,0E0H
+	DEFB	0E0H,0E0H,0E0H,0E0H
+	DEFB	010H,010H,020H,020H
+	DEFB	040H,040H,080H,080H
+	DEFB	000H,000H,000H,000H
+	DEFB	0C0H,030H,00CH,003H
+	DEFB	010H,020H,020H,040H
+	DEFB	040H,040H,080H,080H
+	DEFB	000H,000H,000H,0FFH
+	DEFB	010H,010H,010H,010H
+	DEFB	000H,000H,000H,000H
+	DEFB	001H,006H,038H,0C0H
+	DEFB	008H,008H,004H,004H
+	DEFB	002H,002H,001H,001H
+	DEFB	000H,000H,000H,000H
+	DEFB	080H,060H,01CH,003H
+	DEFB	099H,066H,066H,099H
+	DEFB	099H,066H,066H,099H
+	DEFB	001H,002H,004H,008H
+	DEFB	010H,020H,040H,080H
+	DEFB	000H,000H,0C0H,0C0H
+	DEFB	030H,030H,0CCH,0CCH
+	DEFB	0FFH,001H,001H,001H
+	DEFB	001H,001H,001H,001H
+	DEFB	0FFH,0FFH,0FFH,0FFH
+L1869:	DEFB	0FFH,0FFH,0FFH,0FFH
+;***********************************************************************
+
+;MCAL &C5 PLOT PIXEL ACCORDING TO LINE TYPE
+;INPUT REGISTER		IX	= X COORDINATE
+;			IY	= Y COORDINATE
+ZPLTXY:	PUSH	HL
+L186E:	LD	HL,DOTON
+	LD	A,(DOTCNT)
+	INC	A
+	LD	(DOTCNT),A
+	CP	(HL)
+L1879:	JR	C,L188D
+	INC	HL
+	CP	(HL)
+	JR	C,L1891
+	INC	HL
+	CP	(HL)
+	JR	C,L188D
+	INC	HL
+	CP	(HL)
+	JR	C,L1891
+	XOR	A
+	LD	(DOTCNT),A
+	JR	L186E
+;***********************************************************************
+L188D:	LD	A,1
+	JR	L1894
+;***********************************************************************
+L1891:	XOR	A
+	DEFB	20H		;DUAL COMMAND	JR	NZ,L1879
+;MCAL &C4 PLOT/UNPLOT A PIXEL
+;INPUT REGISTER		IX	= X COORDINATE
+;			IY	= Y COORDINATE
+;			A	= 1 FOR PLOT, 0 FOR UNPLOT
+ZPLOT:	PUSH HL
+L1894:	PUSH	DE
+	PUSH	BC
+	PUSH	AF
+	CALL	ZCALAD
+	JR	C,L18B3
+	POP	HL
+	RES	7,A
+	INC	E
+	DEC	H
+	JR	NZ,L18A5
+	SET	7,A
+L18A5:	DEC	E
+	JR	Z,L18AB
+	RRCA
+	JR	L18A5
+;***********************************************************************
+L18AB:	CALL	ZSETCL
+	POP	BC
+	POP	DE
+	POP	HL
+	XOR	A
+	RET
+;***********************************************************************
+L18B3:	POP	AF
+	POP	BC
+	POP	DE
+	POP	HL
+	XOR	A
+	DEC	A
+	RET
+;***********************************************************************
+;MCAL &CB GET VRAM ADDRESS
+;INPUT REGISTER		IX	= X COORDINATE
+;			IY	= Y COORDINATE
+;OUTPUT REGISTER	BC	= VRAM ADDRESS
+ZCALAD:	PUSH	IX
+	POP	BC
+	PUSH	IY
+	POP	DE
+L18C0:	CALL	ZORGCO
+	RET	C
+	LD	HL,00BFH
+	SBC	HL,DE
+	RET	C
+	LD	A,07H
+	SUB	C
+	AND	07H
+	INC	A
+	LD	D,A
+	LD	A,C
+	AND	0F8H
+	LD	C,A
+	LD	A,L
+	AND	07H
+	OR	C
+	LD	C,A
+	LD	A,L
+	RRCA
+	RRCA
+	RRCA
+	AND	1FH
+	LD	B,A
+	AND	0F8H
+	LD	E,A
+	LD	A,(LFB4E)
+	ADD	A,B
+	AND	07H
+	OR	E
+	LD	B,A
+	RST	28H
+	LD	E,8
+L18EF:	RRCA
+	DEC	E
+	DEC	D
+	JR	NZ,L18EF
+	OR	A
+	RET
+;***********************************************************************
+;MCAL &CA ALTER ORIGIN
+;INPUT REGISTER		BC	= X OFFSET
+;			DE	= Y OFFSET
+ZORGCO:	LD	HL,(ORGY)
+	ADD	HL,DE
+	EX	DE,HL
+	LD	HL,(ORGX)
+	ADD	HL,BC
+	LD	B,H
+	LD	C,L
+	XOR	A
+	CP	B
+	RET
+;***********************************************************************
+;MCAL &C7 GET STATUS OF PIXEL
+;INPUT REGISTER		IX	= X COORDINATE
+;			IY	= Y COORDINATE
+;OUTPUT REGISTER	BC	= VRAM ADDRESS OF PIXEL
+;			A	= 1 FOR FOREGROUND, 0 FOR BACKGROUND
+ZPNTXY:	PUSH	IX
+	POP	BC
+	PUSH	IY
+	POP	DE
+;MCAL &C6 GET STATUS OF PIXEL
+;INPUT REGISTER		BC	= X COORDINATE
+;			DE	= Y COORDINATE
+;OUTPUT REGISTER	BC	= VRAM ADDRESS OF PIXEL
+;			A	= 1 FOR FOREGROUND, 0 FOR BACKGROUND
+ZPOINT:	CALL	L18C0
+	JR	C,L1916
+	BIT	7,A
+	LD	A,0
+	RET	Z
+	INC	A
+	RET
+;***********************************************************************
+L1916:	XOR	A
+	DEC	A
+	RET
+;***********************************************************************
+;MCAL &C8 DRAW LINE ACCORDING TO LINE TYPE
+;INPUT REGISTER		IX	= X START COORDINATE
+;			IY	= Y START COORDINATE
+ZDRWTO:	CALL	ZPLTXY
+	PUSH	HL
+	PUSH	BC
+	LD	BC,(X1)
+	LD	DE,(Y1)
+	PUSH	IY
+	POP	HL
+	CALL	L19A4
+	EXX
+	LD	E,A
+	ADD	A,01H
+	SBC	A,A
+	LD	D,A
+	EXX
+	PUSH	IX
+	EX	(SP),HL
+	LD	D,B
+	LD	E,C
+	CALL	L19A4
+	EXX
+	LD	C,A
+	ADD	A,01H
+	SBC	A,A
+	LD	B,A
+	EXX
+	POP	DE
+	OR	A
+	SBC	HL,DE
+	ADD	HL,DE
+	LD	B,H
+	LD	C,L
+	LD	HL,0000H
+	JP	M,L1978
+L194F:	PUSH	DE
+	PUSH	IX
+	EX	(SP),HL
+	LD	DE,(X1)
+	OR	A
+	SBC	HL,DE
+	POP	HL
+	POP	DE
+	JR	Z,L19A1
+	EXX
+	ADD	IX,BC
+	EXX
+	ADD	HL,DE
+	PUSH	HL
+	ADD	HL,HL
+	JR	C,L1969
+	SBC	HL,BC
+L1969:	POP	HL
+	JR	C,L1973
+L196C:	EXX
+L196D:	ADD	IY,DE
+	EXX
+	OR	A
+	SBC	HL,BC
+L1973:	CALL	ZPLTXY
+	JR	L194F
+;***********************************************************************
+L1978:	PUSH	DE
+	PUSH	IY
+	EX	(SP),HL
+	LD	DE,(Y1)
+	OR	A
+	SBC	HL,DE
+	POP	HL
+	POP	DE
+	JR	Z,L19A1
+	EXX
+	ADD	IY,DE
+	EXX
+	ADD	HL,BC
+	PUSH	HL
+	ADD	HL,HL
+	JR	C,L1992
+	SBC	HL,DE
+L1992:	POP	HL
+	JR	C,L199C
+	EXX
+	ADD	IX,BC
+	EXX
+	OR	A
+	SBC	HL,DE
+L199C:	CALL	ZPLTXY
+	JR	L1978
+;***********************************************************************
+L19A1:	POP	BC
+	POP	HL
+	RET
+;***********************************************************************
+L19A4:	EX	DE,HL
+	XOR	A
+	SBC	HL,DE
+	RET	Z
+	ADD	HL,DE
+	JP	P,L19B1
+	EX	DE,HL
+	DEC	A
+	JR	L19B2
+;***********************************************************************
+L19B1:	INC	A
+L19B2:	OR	A
+	SBC	HL,DE
+	RET
+;***********************************************************************
+;MCAL &CD FILL SCREEN AREA
+;INPUT REGISTER		IX	= X COORDINATE
+;			IY	= Y COORDINATE
+ZFILL:	LD	HL,0FFFDH
+	LD	(FILLSP),HL
+	CALL	L1F99
+L19BF:	CALL	L1AEF
+	LD	(Y1),IX
+	CALL	L19F8
+	INC	IY
+	PUSH	IX
+	CALL	L1A59
+	POP	IX
+	RET	C
+	DEC	IY
+	DEC	IY
+	CALL	L1A59
+	RET	C
+	LD	(USERSP),SP
+	LD	HL,(FILLSP)
+	LD	SP,HL
+	POP	IX
+	POP	IY
+	LD	(FILLSP),SP
+	LD	SP,(USERSP)
+	LD	DE,0FFFDH
+	OR	A
+	SBC	HL,DE
+	JR	NZ,L19BF
+	RET
+;***********************************************************************
+L19F8:	CALL	ZCALAD
+	CALL	L1A50
+	SET	7,A
+	INC	E
+L1A01:	DEC	E
+    JR Z,L1A12
+    RRCA
+	SET	7,A
+	DEC	IX
+	JR	NC,L1A01
+L1A0B:	SCF
+    DEC E
+	JR	Z,L1A12
+	RRCA
+	JR	L1A0B
+;***********************************************************************
+L1A12:	PUSH	AF
+	CALL	L1A42
+	POP	AF
+	JR	NC,L1A1C
+	INC	IX
+	RET
+;***********************************************************************
+L1A1C:	LD	DE,0FFF8H
+	LD	A,C
+	ADD	A,E
+	LD	C,A
+	RET	NC
+	CALL	L1A4F
+	JR	NZ,L1A30
+	ADD	IX,DE
+	CPL
+	CALL	L1A42
+	JR	L1A1C
+;***********************************************************************
+L1A30:	BIT	0,A
+	RET	NZ
+	LD	D,0
+	INC	IX
+L1A37:	INC	D
+    SCF
+    RRA
+	DEC	IX
+	JR	NC,L1A37
+L1A3E:	RLCA
+	DEC	D
+	JR	NZ,L1A3E
+L1A42:	CALL	L1A50
+;MCAL &CC ALTER PATTERN GENERATOR TABLE
+;INPUT REGISTER		BC	= ADDRES (<&17FF)
+;			A	= BYTE
+ZSETCL:	RST	30H
+	SET	5,B
+	LD	A,(GCOLR)
+	RST	30H
+	RES	5,B
+	RET
+;***********************************************************************
+L1A4F:	RST	28H
+L1A50:	PUSH	HL
+	LD	HL,FILL
+	XOR	(HL)
+	XOR	0FFH
+	POP	HL
+	RET
+;***********************************************************************
+L1A59:	CALL	ZPNTXY
+	CP	0FFH
+	RET	Z
+	DEC	A
+	CALL	L1A50
+	JR	Z,L1A6A
+	CALL	L1AEF
+	JR	L1A6D
+;***********************************************************************
+L1A6A:	CALL	L1AC6
+L1A6D:	LD	DE,(Y1)
+	PUSH	IX
+	POP	HL
+	OR	A
+	SBC	HL,DE
+	JP	P,L1A85
+	CALL	L1A96
+	RET	C
+	INC	IX
+	CALL	L1AC6
+	JR	L1A6D
+;***********************************************************************
+L1A85:	PUSH	DE
+	POP	IX
+	CALL	ZPNTXY
+	CP	0FFH
+	RET	Z
+	DEC	A
+	CALL	L1A50
+	RET	Z
+	CALL	L1AEF
+L1A96:	PUSH	IX
+	POP	DE
+	PUSH	IY
+	POP	BC
+	LD	(USERSP),SP
+	LD	SP,(FILLSP)
+	POP	HL
+	PUSH	HL
+	OR	A
+	SBC	HL,DE
+	JR	NZ,L1AB4
+	POP	HL
+	POP	HL
+	SBC	HL,BC
+	ADD	HL,BC
+	JR	Z,L1AB4
+	PUSH	HL
+	PUSH	DE
+L1AB4:	PUSH	BC
+	PUSH	DE
+	LD	HL,LFE08
+	OR	A
+	SBC	HL,SP
+	CCF
+	LD	(FILLSP),SP
+	LD	SP,(USERSP)
+	RET
+;***********************************************************************
+L1AC6:	CALL	ZCALAD
+L1AC9:	INC	IX
+L1ACB:	PUSH	BC
+	CALL	ZPNTXY
+	POP	HL
+	LD	DE,0008H
+	CP	0FFH
+	JR	Z,L1B17
+	DEC	A
+	CALL	L1A50
+	JR	NZ,L1AEF
+	SBC	HL,BC
+	ADD	HL,BC
+	JR	Z,L1AC9
+L1AE2:	CALL	L1A4F
+	INC	A
+	JR	NZ,L1ACB
+	ADD	IX,DE
+	LD	A,C
+	ADD	A,E
+	LD	C,A
+	JR	NC,L1AE2
+L1AEF:	CALL	ZCALAD
+L1AF2:	INC	IX
+L1AF4:	PUSH	BC
+	CALL	ZPNTXY
+	POP	HL
+	LD	DE,0008H
+	CP	0FFH
+	JR	Z,L1B17
+	DEC	A
+	CALL	L1A50
+	JR	Z,L1B17
+	SBC	HL,BC
+	ADD	HL,BC
+	JR	Z,L1AF2
+L1B0B:	CALL	L1A4F
+	JR	NZ,L1AF4
+	ADD	IX,DE
+	LD	A,C
+	ADD	A,E
+	LD	C,A
+	JR	NC,L1B0B
+L1B17:	DEC	IX
+	RET
+;***********************************************************************
+;MCAL &C9 DRAW POLYGON ACCORDING TO LINE TYPE
+;INPUT REGISTER		DE	= START ANGLE
+;			BC	= FINISH ANGLE
+ZPOLYG:	DEC	BC
+	DEC	BC
+	PUSH	AF
+	CALL	L1B53
+	XOR	A
+	LD	(DOTCNT),A
+	EX	DE,HL
+	CALL	L1B73
+	POP	AF
+	PUSH	AF
+	CALL	C,L1B48
+L1B2D:	LD	IX,(X1)
+	LD	IY,(Y1)
+	LD	DE,(CINC)
+	ADD	HL,DE
+	CALL	L1B73
+	CALL	ZDRWTO
+	OR	A
+	SBC	HL,BC
+	ADD	HL,BC
+	JR	C,L1B2D
+	POP	AF
+	RET	NC
+L1B48:	LD	IX,(POLYX)
+	LD	IY,(POLYY)
+	JP	ZDRWTO
+;***********************************************************************
+L1B53:	BIT	7,D
+	JR	Z,L1B5D
+	INC	D
+	INC	D
+	INC	D
+	INC	D
+	JR	L1B53
+;***********************************************************************
+L1B5D:	BIT	7,B
+	JR	Z,L1B67
+	INC	B
+	INC	B
+	INC	B
+	INC	B
+L1B65:	JR	L1B5D
+;***********************************************************************
+L1B67:	LD	H,B
+	LD	L,C
+	OR	A
+	SBC	HL,DE
+	RET	NC
+	INC	B
+	INC	B
+	INC	B
+	INC	B
+	JR	L1B67
+;***********************************************************************
+L1B73:	PUSH	HL
+	PUSH	BC
+	LD	DE,0400H
+	OR	A
+L1B79:	SBC	HL,DE
+	JR	NC,L1B79
+	ADD	HL,DE
+	LD	DE,0200H
+	CALL	L19A4
+	PUSH	AF
+	EX	DE,HL
+	LD	HL,0100H
+	CALL	L19A4
+	POP	BC
+	LD	C,A
+	EX	DE,HL
+	LD	HL,0100H
+	OR	A
+	SBC	HL,DE
+	EX	DE,HL
+	PUSH	DE
+	PUSH	BC
+	LD	A,C
+	LD	DE,(POLYX)
+	LD	BC,(RADX)
+	CALL	L1BBB
+	LD	(X1),HL
+	POP	BC
+	POP	HL
+	LD	A,B
+	LD	DE,(POLYY)
+	LD	BC,(RADY)
+	CALL	L1BBB
+	LD	(Y1),HL
+	POP	BC
+	POP	HL
+	RET
+;***********************************************************************
+L1BBB:	PUSH	DE
+	PUSH	AF
+	INC	H
+	DEC	H
+	JR	NZ,L1BE7
+	INC	L
+	DEC	L
+	LD	DE,0000H
+	JR	Z,L1BDC
+	EX	DE,HL
+	LD	HL,L1BEB
+	ADD	HL,DE
+	LD	E,00H
+	LD	D,(HL)
+	INC	D
+	DEC	D
+	JR	Z,L1BE7
+	CALL	ZIMULT
+	BIT	7,H
+	JR	Z,L1BDC
+	INC	DE
+L1BDC:	POP	AF
+	OR	A
+	POP	HL
+	JP	M,L1BE4
+	ADD	HL,DE
+	RET
+;***********************************************************************
+L1BE4:	SBC	HL,DE
+	RET
+;***********************************************************************
+L1BE7:	LD	D,B
+	LD	E,C
+	JR	L1BDC
+;***********************************************************************
+;KBD CHARACTER SET
+L1BEB:	DEFB	000H,002H,003H,005H
+	DEFB	006H,008H,009H,00BH
+	DEFB	00DH,00EH,010H,011H
+	DEFB	013H,014H,016H,018H
+	DEFB	019H,01BH,01CH,01EH
+	DEFB	01FH,021H,022H,024H
+	DEFB	026H,027H,029H,02AH
+	DEFB	02CH,02DH,02FH,030H
+	DEFB	032H,033H,035H,037H
+	DEFB	038H,03AH,03BH,03DH
+	DEFB	03EH,040H,041H,043H
+	DEFB	044H,046H,047H,049H
+	DEFB	04AH,04CH,04DH,04FH
+	DEFB	050H,052H,053H,055H
+	DEFB	056H,058H,059H,05BH
+	DEFB	05CH,05EH,05FH,061H
+	DEFB	062H,063H,065H,066H
+	DEFB	068H,069H,06BH,06CH
+	DEFB	06DH,06FH,070H,072H
+	DEFB	073H,075H,076H,077H
+	DEFB	079H,07AH,07BH,07DH
+	DEFB	07EH,080H,081H,082H
+	DEFB	084H,085H,086H,088H
+	DEFB	089H,08AH,08CH,08DH
+	DEFB	08EH,090H,091H,092H
+	DEFB	093H,095H,096H,097H
+	DEFB	098H,09AH,09BH,09CH
+	DEFB	09DH,09FH,0A0H,0A1H
+	DEFB	0A2H,0A4H,0A5H,0A6H
+	DEFB	0A7H,0A8H,0AAH,0ABH
+	DEFB	0ACH,0ADH,0AEH,0AFH
+	DEFB	0B1H,0B2H,0B3H,0B4H
+	DEFB	0B5H,0B6H,0B7H,0B8H
+	DEFB	0B9H,0BAH,0BCH,0BDH
+	DEFB	0BEH,0BFH,0C0H,0C1H
+	DEFB	0C2H,0C3H,0C4H,0C5H
+	DEFB	0C6H,0C7H,0C8H,0C9H
+	DEFB	0CAH,0CBH,0CCH,0CDH
+	DEFB	0CEH,0CFH,0CFH,0D0H
+	DEFB	0D1H,0D2H,0D3H,0D4H
+	DEFB	0D5H,0D6H,0D7H,0D7H
+	DEFB	0D8H,0D9H,0DAH,0DBH
+	DEFB	0DCH,0DCH,0DDH,0DEH
+	DEFB	0DFH,0E0H,0E0H,0E1H
+	DEFB	0E2H,0E3H,0E3H,0E4H
+	DEFB	0E5H,0E5H,0E6H,0E7H
+	DEFB	0E7H,0E8H,0E9H,0E9H
+	DEFB	0EAH,0EBH,0EBH,0ECH
+	DEFB	0EDH,0EDH,0EEH,0EEH
+	DEFB	0EFH,0EFH,0F0H,0F1H
+	DEFB	0F1H,0F2H,0F2H,0F3H
+	DEFB	0F3H,0F4H,0F4H,0F5H
+	DEFB	0F5H,0F5H,0F6H,0F6H
+	DEFB	0F7H,0F7H,0F8H,0F8H
+	DEFB	0F8H,0F9H,0F9H,0F9H
+	DEFB	0FAH,0FAH,0FAH,0FBH
+	DEFB	0FBH,0FBH,0FCH,0FCH
+	DEFB	0FCH,0FCH,0FDH,0FDH
+	DEFB	0FDH,0FDH,0FEH,0FEH
+	DEFB	0FEH,0FEH,0FEH,0FFH
+	DEFB	0FFH,0FFH,0FFH,0FFH
+	DEFB	0FFH,0FFH,000H,000H
+	DEFB	000H,000H,000H,000H
+	DEFB	000H,000H,000H,000H
+;***********************************************************************
+;MCAL &A2 READ SECTOR
+ZRSECT:	XOR	A		;SET FOR READ
+	JR	L1CF0
+;***********************************************************************
+;MCAL &A3 WRITE SECTOR
+ZWSECT:	LD	A,1		;SET FOR WRITE
+L1CF0:	LD	(RWFLAG),A	;SET READ/WRITE FLAG
+	LD	A,10		;SET NUMBER OF RETRYS TO 10
+	LD	(DTRYS),A
+L1CF8:	CALL	CALDSC		;GET DRIVE/SIDE SELECT CODE
+	OUT	(DRVSEL),A	;SELECT DRIVE AND SIDE
+	CALL	MOTON
+	JP	NZ,RWERR	;JUMP IF DRIVE NOT READY
+	CALL	DEFTRK		;SET TRACK POINTER
+	LD	A,(HL)
+	OUT	(FDC+1),A	;SET FDC TRACK REGISTER
+	LD	A,(HSTTRK)
+	CP	(HL)
+	JR	Z,L1D22		;JUMP IF ON REQUIRED TRACK
+	LD	(HL),A
+	OUT	(FDC+3),A	;SET TRACK TO FIND
+	LD	A,10H
+	CALL	STPCMD		;SEND SEEK COMMAND
+	CALL	Z,CHKST		;IF SUCESSFUL WAIT FOR SEEK TO FINISH
+	LD	DE,0A0B9H	;D=10100000B	E=10111001B
+	CALL	Z,DELTST		;IF SEEK OK THEN GET DRIVE STATUS
+	JR	NZ,RWERR	;JUMP IF NOT REQUIRED STATUS
+L1D22:	LD	A,(HSTSEC)
+	OUT	(FDC+2),A	;SET FDC SECTOR
+	LD	A,(SSIZE)	;GET SECTOR SIZE - No 256 BYTE SECTORS
+	LD	D,A
+	LD	C,FDC+3
+	LD	HL,(HSTDMA)
+	LD	A,(RWFLAG)
+	OR	A
+	DI
+	JR	NZ,DWRSCT	;JUMP IF WRITING 256 BYTE SECTORS
+DRDSCT:	LD	A,80H		;READ SECTOR COMMAND
+	LD	B,0
+	CALL	ZDCMD		;SEND FDC COMMAND
+	JR	NZ,L1D54	;JUMP IF COMMAND NOT ACEPTED
+L1D40:	IN	A,(FDC)
+	RRCA
+	JR	NC,L1D51	;JUMP IF DRIVE BECOMES NOT BUSY
+	RRCA
+	JR	NC,L1D40	;LOOP UNTIL BYTE READY TO READ
+	INI
+	JP	NZ,L1D40	;LOOP UNTIL 256th BYTE
+	DEC	D	
+	JP	NZ,L1D40	;LOOP UNTIL SECTOR COMPLETE
+L1D51:	CALL	CHKST		;WAIT FOR READ TO TIMEOUT
+L1D54:	EI
+	JR	NZ,RWERR	;JUMP IF ERROR ON TIMEOUT
+	IN	A,(FDC)		;GET DRIVE STATUS
+	AND	0BFH		;IGNORE WRITE PROTECT BIT
+	JR	RWDUN
+;***********************************************************************
+DWRSCT:	LD	A,0A0H		;WRITE SECTOR COMMAND
+	LD	B,0
+	CALL	ZDCMD		;SEND FDC COMMAND
+	JR	NZ,L1D82	;JUMP IF NOT SUCESSFUL
+	CALL	ZRDMEM		;GET BYTE TO WRITE
+	LD	E,A
+L1D6A:	IN	A,(FDC)
+	RRCA
+	JR	NC,L1D7F	;JUMP IF DRIVE BECOMES NOT BUSY
+	RRCA
+	JR	NC,L1D6A	;LOOP UNTIL READY TO WRITE BYTE
+	OUT	(C),E		;WRITE BYTE
+	INC	HL		;POINTER TO NEXT BYTE
+	CALL	ZRDMEM		;GET NEXT BYTE
+	LD	E,A
+	DJNZ	L1D6A		;LOOP UNTIL 256 BYTES WRITTEN
+	DEC	D
+	JP	NZ,L1D6A	;LOOP UNTIL SECTOR COMPLETE
+L1D7F:	CALL	CHKST		;WAIT FOR WRITE TO TIMEOUT
+L1D82:	EI
+	JR	NZ,RWERR	;JUMP IF ERROR  ON TIMEOUT
+	IN	A,(FDC)		;GET DRIVE STATUS
+RWDUN:	CP	80H
+	RET	Z		;RETURN IF SCESSFUL READ OR WRITE
+RWERR:	CALL	STCNV		;DETERMINE DRIVE ERROR
+	LD	HL,DTRYS
+	CP	4
+	JR	NC,L1D98
+	CP	2
+	JR	NZ,L1D9A
+L1D98:	LD	(HL),01H
+L1D9A:	LD	A,0D0H		;FORCE INTERRUPT COMMAND
+	OUT	(FDC),A
+	DEC	(HL)
+	JR	Z,L1DA6
+	DEFB	0CFH,0AFH	;MCAL ZHMDSC
+	JP	Z,L1CF8		;JUMP IF DRIVE READY
+L1DA6:	DEFB	0CFH,0BDH	;MCAL ZFDRST
+	LD	A,(DERROR)
+	OR	A
+	RET
+;***********************************************************************
+;GET DRIVE/SIDE SELECT CODE
+CALDSC:	PUSH	HL
+	CALL	DSCBIT		;GET DRIVE SELECT CODE
+	LD	L,(HL)		;SET DRIVE SELECT CODE
+	LD	A,(HSTSEC)
+	SUB	0AH
+	JR	C,L1DBB
+	SET	4,L		;SET SIDE TWO IF SECTOR > 10
+L1DBB:	LD	A,L
+	POP	HL
+	RET
+;***********************************************************************
+;GET NUMBER OF SECTORS PER TRACK
+GNSECT:	PUSH	HL
+	CALL	DSCBIT		;GET DRIVE SELECT POINTER
+	LD	A,(DTYPE)
+	AND	(HL)
+	POP	HL
+	LD	A,10
+	RET	Z		;RETURN IF SINGLE SIDED DRIVE
+	ADD	A,A
+	RET			;DOUBLE SIDED DRIVE
+;***********************************************************************
+;GET DRIVE SELECT POINTER
+DSCBIT:	LD	A,(HSTDSC)
+	LD	HL,L0034	;BASE ADDRESS OF DRIVE CODES
+	AND	03H
+	ADD	A,L
+	LD	L,A
+	RET			;HL POINTS TO DRIVE SELECT CODE
+;***********************************************************************
+MOTON:	XOR	A
+	IN	A,(FDC)		;GET DRIVE STATUS
+	RLA
+	RET	C		;RETURN IF MOTOR ON
+;MCAL &AF RESTORE DRIVE HEAD
+ZHMDSC:	LD	A,04H		;RESTORE AND VERIFY TRACK 0 COMMAND
+	CALL	STPCMD		;SEND FDC COMMAND
+	CALL	Z,CHKINX		;IF DRIVE BUSY THEN FIND INDEXX
+	CALL	Z,CHKST		;IF INDEX FOUND THEN WAIT FOR TIMEOUT
+	LD	DE,0A4BDH	;D=10100100B	E=10111101B
+	CALL	Z,DELTST		;IF SUCESSFUL TIMEOUT THEN GET FDC STAUS
+	JR	NZ,STCNV	;JUMP IF NOT REQUIRED STATUS
+	CALL	DEFTRK		;GET DRIVE HEAD POINTER
+	XOR	A
+	OUT	(FDC+1),A	;RESET FDC TRACK REGISTER
+	LD	(HL),A		;SET DRIVE HEAD POSITION TO TRACK 0
+	RET
+;***********************************************************************
+;SET DRIVE ERROR FLAG
+;INPUT REGISTER		:-	A = FDC ERROR STATUS
+STCNV:	PUSH	DE
+	CP	0FEH
+	LD	E,5
+	JR	Z,L1E0E		;JUMP IF DRIVE NOT BUSY (5)
+	DEC	E
+	CP	0FFH		
+	JR	Z,L1E0E		;JUMP IF DRIVE STILL BUSY (4)
+	DEC	E
+	BIT	4,A
+	JR	NZ,L1E0E	;JUMP IF RECORD NOT FOUND (3)
+	DEC	E
+	BIT	6,A
+	JR	NZ,L1E0E	;JUMP IF WRITE PROTECT (2)
+	DEC	E		; (1)
+L1E0E:	LD	A,E
+	POP	DE
+	LD	(DERROR),A	;SET DRIVE ERROR FLAG
+	OR	A
+	RET
+;***********************************************************************
+;SET FDC COMMAND
+;INPUT REGISTERS	:-	A = FDC COMMAND
+;REGISTERS CHANGED	:-	A = FFH IF ERROR, 00H IF NOT
+;FLAGS	ZERO	NO ERROR
+; STPCMD - O/P A "TYPE 1 " RESTORE OR SEEK TO FDC
+STPCMD:	PUSH	HL
+	LD	HL,DFLAG
+	OR	(HL)		;ANY MORE BITS TO SET
+	POP	HL
+;MCAL &AE OUTPUT COMMAND TO FDC
+ZDCMD:	OUT	(FDC),A		;SEND COMMAND
+	PUSH	BC
+	LD	B,80H
+L1E20:	IN	A,(FDC)
+	RRCA
+	JR	C,L1E2B		;JUMP IF COMMAND ACCEPTED
+	DJNZ	L1E20		;TIME OUT ?
+L1E27:	POP	BC
+	XOR	A
+	DEC	A
+	RET			;RETURN IF ERROR
+L1E2B:	POP	BC
+	XOR	A
+	RET			;RETURN IF NO ERROR
+;***********************************************************************
+;WAIT FOR CURRENT FDC COMMAND TO TIMEOUT
+;FLAGS	ZERO	COMMAND TERMINATED PROPERLY
+CHKST:	PUSH	BC
+	PUSH	DE
+	LD	D,3
+	LD	BC,0000H
+L1E35:	IN	A,(FDC)		;GET DRIVE STATUS
+	RRCA
+	JR	NC,L1E45	;JUMP IF FDC NOT BUSY
+	DEC	BC
+	LD	A,B
+	OR	C
+	JR	NZ,L1E35	;LOOP UNTIL TIMEOUT
+	DEC	D
+	JR	NZ,L1E35	;TIME OUT
+	POP	DE
+	JR	L1E27		;ERROR CONDITION
+L1E45:	POP	DE
+	POP	BC
+  	XOR	A
+	RET			;RETURN IF NO ERROR
+;***********************************************************************
+;GET DRIVE STATUS AFTER A KNOWN DELAY
+;FLAGS	ZERO	REQUIRED STATUS
+; DELTST - ALLOW HEAD SETTLING TIME THEN CHECK STATUS
+DELTST:	PUSH	DE
+	LD	DE,1100H	;SET UP DELAY
+L1E4D:	DEC	DE		
+	LD	A,D
+	OR	E
+	JR	NZ,L1E4D	;DELAY FINISHED ?
+	POP	DE
+	IN	A,(FDC)
+	AND	E		;MASK UNWANTED STATUS BITS
+	CP	D		;SET ZERO FLAG IF REQUIRED STATUS
+	RET
+;***********************************************************************
+;LOCATE INDEX
+;FLAGS	ZERO	INDEX FOUND
+CHKINX:	PUSH	BC
+	LD	BC,0000H
+L1E5C:	DEC	BC
+	LD	A,B
+	OR	C
+	JR	Z,L1E69		;JUMP IF TIMEOUT
+	IN	A,(FDC)
+	BIT	1,A
+	JR	Z,L1E5C		;TRY AGAIN FOR INDEX ?
+	JR	L1E2B		;INDEX FOUND - SET ZERO FLAG
+;***********************************************************************
+L1E69:	IN	A,(FDC)		;GET DRIVE STATUS
+	RLA
+	RLA
+	CCF			;RESET CARRY FLAG IF WRITE PROTECT ERROR
+	SBC	A,A
+	DEC	A
+	POP	BC
+	RET
+;************************************************************************
+;MCAL &BD RESET FDC AFTER ERROR, ALSO RESETS PSG
+;REGISTERS CHANGED 	:-	A = 00H
+ZFDRST:	XOR	A
+	OUT	(DRVSEL),A	;DISABLE ALL DRIVES
+	PUSH	BC
+	LD	B,20H
+L1E78:	OUT	(SFTRST),A		;DELAY LOOP RESETING FDC AND PSG
+	EX	(SP),HL
+	EX	(SP),HL
+	DJNZ	L1E78		;LOOP UNTIL END OF DELAY
+	DEFB	0CFH,0C0H	;MCAL ZPINIT
+	POP	BC
+	RET
+;************************************************************************
+;GET POINTER TO DRIVES LAST HEAD POSITION
+;REGISTERS CHANGED 	:-	A = DRIVE
+;		  		HL= DRIVE POINTER
+DEFTRK:	LD	A,(HSTDSC)
+	LD	HL,HEAD0	;BASE ADDRESS OF HEAD POINTER
+	ADD	A,L
+	LD	L,A
+	RET	NC
+	INC	H
+	RET
+;************************************************************************
+;MCAL &B6
+;INPUT REGISTERS	:-	C = DRIVE
+;REGISTERS CHANGED 	:-	A = DRIVE
+;				HL= DRIVE POINTER
+;				BC=(0FBB3H)
+;FLAGS - CARRY SET IF DRIVE > 4
+ZSLDSC:	LD	HL,0000H
+	LD	A,C
+	LD	(CPMDRV),A
+	CP	4
+	RET	NC		;RETURN IF DRIVE > 4....CARRY SET
+	LD	L,A
+	LD	BC,(LFBB3)
+	ADD	HL,HL		;CALCULATE CPMDRV*&20 OFFSET 
+	ADD	HL,HL
+	ADD	HL,HL
+	ADD	HL,HL
+	ADD	HL,BC
+	RET
+;************************************************************************
+;MCAL &B7 SET CPM TRACK FOR 128 BYTE SECTOR
+;INPUT REGISTERS	:-	C = TRACK
+;REGISTERS CHANGED 	:-	A = TRACK
+ZSETRK:	LD	A,C
+	LD	(CPMTRK),A
+	RET
+;************************************************************************
+;MCAL &B8 SET CPM 128 BYTE SECTOR
+;INPUT REGISTERS	:-	C = SECTOR
+;REGISTERS CHANGED 	:-	A = SECTOR
+ZSETSC:	LD	A,C
+	LD	(CPMSEC),A
+	RET
+;************************************************************************
+;MCAL &B9 SET CPM DRIVE DMA ADDRESS
+;INPUT REGISTERS	:-	BC = DMA ADDRESS
+ZSETBF:	LD	(CPMADD),BC
+	RET
+;************************************************************************
+;MCAL &BA
+ZRD128:	LD	HL,RAMSEC	;DEFAULT LOCATION FOR 512 BYTE SECTOR
+	LD	(HSTDMA),HL
+	XOR	A
+	LD	(LFB87),A	;(0FB87H)=00H
+	INC	A
+	LD	(LFB8A),A	;(0FB8AH)=01H
+	INC	A
+	LD	(LFB8B),A	;(0FB8BH)=02H
+	CALL	L1FB4
+	LD	A,C
+	CP	1
+	JR	Z,L1F31
+	JR	L1F1D
+;************************************************************************
+;MCAL &BB
+ZWR128:	LD	HL,RAMSEC	;DEFAULT LOCATION FOR 512 BYTE SECTOR
+	LD	(HSTDMA),HL
+	XOR	A
+	CALL	L1FB4
+	LD	A,C
+	LD	(LFB8B),A
+	CP	2
+	JR	NZ,L1EF0
+	LD	A,10H
+	LD	(LFB87),A
+	LD	HL,(CPMDRV)
+	LD	(LFB83),HL
+	LD	A,(CPMSEC)
+	LD	(LFB85),A
+L1EF0:	LD	A,(LFB87)
+	OR	A
+	JR	Z,L1F15
+	DEC	A
+	LD	(LFB87),A
+	LD	A,(CPMSEC)
+	LD	HL,LFB83
+	CALL	L1FC2		;CHECK CURRENT LOCATION
+	JR	NZ,L1F15	;JUMP IF ERROR OCCURED
+	INC	(HL)
+	CALL	GNSECT
+	ADD	A,A
+	ADD	A,A
+	CP	(HL)
+	JR	NZ,L1F12
+	LD	(HL),00H
+	DEC	HL
+	INC	(HL)
+L1F12:	XOR	A
+	JR	L1F1A
+;************************************************************************
+L1F15:	XOR	A
+	LD	(LFB87),A
+	INC	A
+L1F1A:	LD	(LFB8A),A
+L1F1D:	LD	HL,LFB86
+	LD	A,(HL)
+	LD	(HL),01H
+	OR	A
+	JR	Z,L1F3B
+	LD	A,(LFB82)
+	LD	HL,HSTDSC
+	CALL	L1FC2		;CHECK CURRENT LOCATION
+	JR	Z,L1F64		;JUMP IF ERROR OCCURED
+L1F31:	LD	A,(LFB88)
+	OR	A
+	JR	Z,L1F3B		;JUMP IF NO WRITE REQUIRED
+	DEFB	0CFH,0A3H	;MCAL ZWSECT
+	JR	NZ,L1FAA	;JUMP IF ERROR
+L1F3B:	LD	HL,(CPMDRV)	;GET CPM DRIVE AND TRACK
+	LD	A,(HSTDSC)
+	CP	L		;IS CPM DRIVE SAME AS CURRENT DRIVE
+	LD	(HSTDSC),HL	;SET UP DRIVE AND TRACK
+	JR	Z,L1F50		;JUMP IF NO NEED TO CHANGE DRIVES
+	CALL	CALDSC		;GET DRIVE AND SIDE CODE
+	OUT	(DRVSEL),A	;SELECT DRIVE AND SIDE
+	DEFB	0CFH,0AFH	;MCAL ZHMDSC
+	JR	NZ,L1FAA	;JUMP IF ERROR
+L1F50:	LD	A,(LFB82)
+	LD	(HSTSEC),A	;SET UP SECTOR TO READ
+	LD	A,(LFB8A)
+	OR	A
+	JR	Z,L1F60		;JUMP IF NO READ REQUIRED
+	DEFB	0CFH,0A2H	;MCAL ZRSECT
+	JR	NZ,L1FAA	;JUMP IF ERROR
+L1F60:	XOR	A
+	LD	(LFB88),A
+L1F64:	LD	A,(CPMSEC)	;CALCULATE OFFSET FOR 128 BYTE SECTOR
+	LD	C,0
+	AND	03H
+	RRA
+	RR	C
+	LD	B,A
+	LD	HL,RAMSEC	;BASE POINTER OF 512 BYTE SECTOR
+	ADD	HL,BC		;SET POINTER TO START OF 128 BYTE SECTOR
+	LD	BC,128		;BYTES TO TRANSFER
+	LD	DE,(CPMADD)
+	LD	A,(LFB89)
+	OR	A
+	JR	NZ,L1F86
+	EX	DE,HL
+	LD	A,1
+	LD	(LFB88),A
+L1F86:	DEFB	0CFH,0B2H	;MCAL ZRCPYU
+	LD	A,(LFB8B)
+	CP	1
+	JR	NZ,L1F97	;JUMP IF NO WRITE REQUIRED
+	XOR	A
+	LD	(LFB88),A
+	DEFB	0CFH,0A3H	;MCAL ZWSECT
+	JR	NZ,L1FAA
+L1F97:	XOR	A
+	RET
+;************************************************************************
+L1F99:	LD	A,(LFB88)
+	OR	A
+	RET	Z		;RETURN IF NOT A WRITE SEQUENCE
+	XOR	A
+	LD	(LFB88),A	;SET NEXT OPERATION TO READ
+	LD	HL,RAMSEC	;BASE ADDRESS OF 512 BYTE SECTOR
+	LD	(HSTDMA),HL
+	DEFB	0CFH,0A3H	;MCAL ZWSECT
+L1FAA:	PUSH	AF
+	XOR	A
+	LD	(LFB86),A
+	LD	(LFB87),A
+	POP	AF
+	RET
+;************************************************************************
+;SET CPM 128 BYTE SECTOR INTO 512 BYTE SECTOR
+L1FB4:	LD	(LFB89),A
+	LD	A,(CPMSEC)
+	SRL	A
+	SRL	A
+	LD	(LFB82),A
+	RET
+;************************************************************************
+;CHECK IF STILL ON LAST KNOWN DRIVE AND TRACK
+;INPUT REGISTERS	:-	HL= PONTER TO CURRENT DRIVE
+;REGISTERS CHANGED	:-	C = A
+;				HL=HL+2 IF NO ERROR
+;FLAGS - NON ZERO IF ERROR
+L1FC2:	LD	C,A
+	LD	A,(CPMDRV)
+	CP	(HL)
+	RET	NZ		;RETURN IF NOT CURRENT DRIVE....NON ZERO
+	LD	A,(CPMTRK)
+	INC	HL
+	CP	(HL)
+	RET	NZ		;RETURN IF NOT CURRENT TRACK....NON ZERO
+	LD	A,C
+	INC	HL
+	CP	(HL)
+	RET
+;************************************************************************
+;REST OF PROM EMPTY
+L1FD2:	DEFB	0FFH,0FFH,0FFH,0FFH
+	DEFB	0FFH,0FFH,0FFH,0FFH
+	DEFB	0FFH,0FFH,0FFH,0FFH
+	DEFB	0FFH,0FFH,0FFH,0FFH
+	DEFB	0FFH,0FFH,0FFH,0FFH
+	DEFB	0FFH,0FFH,0FFH,0FFH
+	DEFB	0FFH,0FFH,0FFH,0FFH
+	DEFB	0FFH,0FFH,0FFH,0FFH
+	DEFB	0FFH,0FFH,0FFH,0FFH
+	DEFB	0FFH,0FFH,0FFH,0FFH
+	DEFB	0FFH,0FFH,0FFH,0FFH
+L1FFE:	DEFB	0FFH,0FFH
+;************************************************************************
+;*************************     THE END      *****************************
+;************************************************************************
+

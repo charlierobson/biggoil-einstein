@@ -56,22 +56,22 @@ showwinch:
 
 
 
-invertscreen:
+invertScreen:
 	ld		hl,dfile
 	ld		bc,33*24
 
-_inverter:
+-:
 	ld		a,(hl)
 	cp		$76
-	jr		z,_noinvert
+	jr		z,{+}
 
 	xor		$80
 	ld		(hl),a
 
-_noinvert:
++:
 	inc		hl
 	dec		bc
 	ld		a,b
 	or		c
-	jr		nz,_inverter
+	jr		nz,{-}
 	ret

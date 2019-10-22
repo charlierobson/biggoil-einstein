@@ -86,7 +86,7 @@ _die:
 	jp		nz,restart
 
 	ld		b,100
-	call	waitframes
+	call	waitFrames
     ret
 
 _playon:
@@ -232,7 +232,7 @@ tidyup:
 	ld		b,4
 -:	push	bc
 	call	framesync
-	call	invertscreen
+	call	invertS     creen
 	pop		bc
 	djnz	{-}
 

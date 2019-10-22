@@ -19,9 +19,9 @@
 ;-------+-------+-------+-------+-------+-------+-------+-------'
 
 
-VDP_DATA    .equ $08    ; read/write
+VDP_DATA    .equ $08    ; read/write data
 
-VDP_REG     .equ $09    ; write
+VDP_REG     .equ $09    ; write/address
 VDP_STAT    .equ $09    ; read
 
 ; vram addresses
@@ -50,7 +50,7 @@ COL_WHITE    .equ $0F
 
 initVDP:  ;  set graphic 1 mode, bg col, vram layout.
 
-    call    displayOff
+    ; call    displayOff
 
     ; clear VRAM
 
@@ -87,16 +87,7 @@ initVDP:  ;  set graphic 1 mode, bg col, vram layout.
     ; init display mode
 
     ld      hl,graphic1data             ; pairs of bytes representing a vdp register value and register number with bit 7 set
-    ld      de,$7010                    ; copy to ram to modify PAL/NTSC bit (reg 0, bit 0)
-    push    de
-    ld      bc,16
-    ldir
-    ld      a,($0f)                     ; PAL ROM contains F3 at this address, NTSC ROM contains F6
-    and     1
-    ld      ($7010),a                   ; PAL/!NTSC
-
-    pop     hl                          ; data to OUT
-    ld      bc,$1011                    ; 16 bytes to port $11
+    ld      bc,$1000+VDP_REG            ; 16 bytes to write
     otir
     ret
 
@@ -131,7 +122,7 @@ writeFont:
 
 
 graphic1data:
-    .db     $01,$80,$e0,$81,$05,$82,$80,$83,$01,$84,$20,$85,$00,$86,(COL_BLACK<<4)+COL_WHITE,$87
+    .db     $00,$80,$e0,$81,$05,$82,$80,$83,$01,$84,$20,$85,$00,$86,(COL_BLACK<<4)+COL_WHITE,$87
 
 
 ; set vdp write address
@@ -160,18 +151,18 @@ writeVDP:
     ret
 
 
-waitframes:
 waitFrames:
     call    waitVSync
     djnz    waitFrames
 
 waitVSync:
-;     ld      hl,frames
-;     ld      a,(hl)
-; -:  cp      (hl)
-;     jr      z,{-}
+    in      a,(VDP_STAT)        ; poll VDP's status register for the vblank bit (7). reading it clears it.
+    rla
+    jr      nc,waitVSync
+    ld      a,(frames)
+    inc     a
+    ld      (frames),a
     ret
-
 
 cls:
     di
@@ -236,23 +227,6 @@ textOutN:
 
 
 
-invertScreen:
-	ld		hl,dfile
-    ld      bc,33*24
-
--:  ld		a,(hl)
-	xor		$80
-    ld      (hl),a
-    inc     hl
-    dec     bc
-    ld      a,b
-    or      c
-    jr      nz,{-}
-
-    ret
-
-
-
 framesync:
     call    waitVSync
 
@@ -276,7 +250,7 @@ framesync:
     ; fall in to ..
 
 setborder:
-    ret
+   ret ; comment/uncomment to disable the border timing bars
 
 	out		(VDP_REG),a
 	ld		a,$87
