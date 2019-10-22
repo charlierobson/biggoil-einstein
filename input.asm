@@ -53,18 +53,19 @@ updateinputstate:
 	;
     LD		A,0EH
 	OUT		(PSG_SEL),A
-	ld		a,(hl)						; get key row selector
-	CPL
+	ld		a,(hl)					; get key row selector
+	CPL								; make it active low
 	OUT		(PSG_WR),A
 
-	LD		A,0FH						; read key row
+	LD		A,0FH					; read key row
 	OUT		(PSG_SEL),A
 	IN		A,(PSG_RD)
-	CPL
+	CPL								; active low->hi
 
-	xor 	a
 	inc		hl						; point to row mask
 	and		(hl)					; result will be non-zero if required key is down
+
+	; note - all JS stuff is redundant, for now, but left here in case
 
 	inc		hl						; points at js mask
 	ld		b,$ff					; match-all mask

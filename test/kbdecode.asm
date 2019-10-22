@@ -10,29 +10,33 @@ VDP_DATA    .equ $08    ; read/write
 VDP_REG     .equ $09    ; write
 VDP_STAT    .equ $09    ; read
 
+CR=13
+LF=10
+
 
     ld      a,12    ; cls
 	.db     $cf,$9E
 
--:  
+    .db     $cf,$cf
+    .db     CR,LF,CR,LF,CR,LF,CR,LF,CR,LF,CR,LF,CR,LF,CR,LF,CR,LF,CR,LF,CR,LF
+    .db     "Rows are bits 7..0, Cols are $01-$80",CR,LF
+    .db     11,11,11,11,11,11,11,11,11,11,11,11,11+$80
 
-
-
-    ld      e,$80 ; e = row select bit
+-:  ld      e,1 ; e = row select bit
     call    row
-    srl     e
+    sla     e
     call    row
-    srl     e
+    sla     e
     call    row
-    srl     e
+    sla     e
     call    row
-    srl     e
+    sla     e
     call    row
-    srl     e
+    sla     e
     call    row
-    srl     e
+    sla     e
     call    row
-    srl     e
+    sla     e
     call    row
 
     .db     $cf,$cf
