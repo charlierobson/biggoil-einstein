@@ -136,7 +136,7 @@ afxFrame1
 	sub		$20
 	jr		c,afxFrame2				;less than $ 20, play on
 	ld		h,a						;otherwise the end of the effect
-	ld		b,$ff
+	ld		b,$ff ; bug?
 	ld		b,c						;in BC we record the longest time
 	jr		afxFrame6
 	

@@ -172,6 +172,7 @@ nextlevel:
 	call	AYFX.PLAYON3
 
 	call	tidyup
+
 	call	levelup
 	call	displaylvl
 
@@ -222,6 +223,7 @@ loselife:
 	call	AYFX.PLAYON3
 
 +:	call	tidyup
+
 	ld		a,(lives)
 	dec		a
 	ld		(lives),a
@@ -235,7 +237,7 @@ tidyup:
 	ld		b,4
 -:	push	bc
 	call	framesync
-	call	invertS     creen
+	call	invertScreen
 	pop		bc
 	djnz	{-}
 
