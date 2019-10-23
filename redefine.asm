@@ -4,18 +4,33 @@
 
 	.align  64
 _keychar:
-	.db	    $87,$86,$C0,$C7,$83,$82,$81,$80
-	.asc	"IOP?_?|0"
-	.asc	"KL;:??9",$C5
-	.asc	",./8?=?",$C4
-	.asc	"7654321",$C3
-	.asc	"UYTREWQ",$C2
-	.asc	"JHGFDSA",$C1
-	.asc	"MNBVCXZ",$C6
+	.db	    $84,0,$C0,$C7,$83,$82,$81,$80
+	.asc	"IOP"
+	.db		$85
+	.asc	"_"
+	.db		$86,$87
+	.asc	"0"
+	.asc	"KL;:"
+	.db		$88,$89
+	.asc	"9"
+	.db		$C5
+	.asc	",./8"
+	.db		$8a
+	.asc	"="
+	.db		$8b,$C4
+	.asc	"7654321"
+	.db		$C3
+	.asc	"UYTREWQ"
+	.db		$C2
+	.asc	"JHGFDSA"
+	.db		$C1
+	.asc	"MNBVCXZ"
+	.db		$C6
 
 _kcs:
-	.word	_k0,_k1,_k2,_k3,0,0,0,_k7
-_kcsEnd:
+	.word	_k0,_k1,_k2,_k3,_k4,_k5
+	.word	_k6,_k7,_k8,_k9,_k10,_k11
+
 
 _k0:
 	.asc	"ESC",$ff
@@ -25,8 +40,22 @@ _k2:
 	.asc	"ENTER",$ff
 _k3:
 	.asc	"AL",$ff
+_k4:
+	.asc	"BREAK",$ff
+_k5:
+	.asc	"<-",$ff
+_k6:
+	.asc	"LF",$ff
 _k7:
-	.asc	"BRK",$ff
+	.asc	"1/2",$ff
+_k8:
+	.asc	"->",$ff
+_k9:
+	.asc	"HT",$ff
+_k10:
+	.asc	"DEL",$ff
+_k11:
+	.asc	"%",$ff
 
 
 _bit2bytetbl:
