@@ -74,7 +74,7 @@ helpscn:
 _helploop:
 	call	framesync
 
-	ld		hl,(wframes)
+	ld		hl,(frames)
 	sla		l
 	rl		h
 	sla		l
@@ -89,7 +89,7 @@ _helploop:
 	add		a,l		; * 20
 	ld		l,a
 	ld		h,offscreenmap/256
-	ld		de,dfile+$3FE
+	ld		de,dfile+$2FE
 	ld		bc,20
 	ldir
 

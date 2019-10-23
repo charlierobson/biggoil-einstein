@@ -64,16 +64,19 @@ _frk:
 
 
 redefinekeys:
+	; call	initsfx
+
     call    cls
 
 	ld		hl,_pkf
 	ld		de,$0802
 	call	textOut
 
-	ld		a,3
-	call	AYFX.PLAY
+	; ld		a,3
+	; call	AYFX.PLAY
 
--:	call	_getcolbit			; wait for key release
+-:	call	waitVSync
+	call	_getcolbit			; wait for key release
 	jr		nz,{-}
 
 	ld		hl,_upk
@@ -90,6 +93,8 @@ redefinekeys:
 	
 	ld		hl,_frk
 
+	; fall
+
 _redeffit:
 	ld		e,(hl)
 	inc		hl
@@ -104,6 +109,7 @@ _redeffit:
 	call	textOut
 
 _redefloop:
+	call	waitVSync
 	call	_getcolbitDebounced
 	jr		z,_redefloop
 
@@ -125,12 +131,13 @@ _redefloop:
     ld      a,c                     ; store the bit number for the key
     ld      (keycol),a
 
-	ld		a,4
-	call	AYFX.PLAY
+	; ld		a,4
+	; call	AYFX.PLAY
 
     call    _showkey
 
 _redefnokey:
+	call	waitVSync
 	call	_getcolbit
 	jr		nz,_redefnokey
 	ret
@@ -176,7 +183,7 @@ _getcolbitDebounced:
 
 _dbit:
 	ld		b,a						; stash the bit we're looking for
-	ld		l,10					; start a timer
+	ld		l,4						; start a timer
 
 -:	call	waitVSync
 	call	readKeyRow

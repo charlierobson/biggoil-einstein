@@ -45,7 +45,7 @@ _titleloop:
 	ldir
 
 	ld		  a,(frames)
-	and		 15
+	and		 16
 	jr		  nz,_noflash
 
 	ld		  hl,dfile+$301
@@ -66,6 +66,7 @@ _noflash:
 	jr		nz,{+}
 
 	call	helpscn
+	call	waitVSync
 	jp		titlerestart
 
 +:	ld		a,(redef)
@@ -73,9 +74,9 @@ _noflash:
 	cp		1
 	jr		nz,{+}
 
-	call	redefinekeys			; redefine keys and copy any altered fire/start key
-	ld		hl,(fire-3)
-	ld		(begin-3),hl
+	call	redefinekeys
+	call	waitVSync
+	jp		titlerestart
 
 +:	ld		a,(begin)
 	and		3

@@ -100,7 +100,6 @@ offscreenmap = $7400		;	dfile + $400
 	.var	byte, tcd
 	.var	byte, tt
 	.var	byte, frames
-	.var	word, wframes
 	.var	byte, winchframe
 	.var	word, playerpos
 	.var	word, oldplayerpos
