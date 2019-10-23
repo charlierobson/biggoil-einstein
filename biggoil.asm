@@ -47,7 +47,7 @@ clrirq:
 #include "decrunch.asm"
 #include "input.asm"
 #include "vdp.asm"
-#include "ayfxplayAY.asm"
+#include "ayfxplay.asm"
 #include "sfx.asm"
 #include "stcplay.asm"
 

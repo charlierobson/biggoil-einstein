@@ -13,21 +13,7 @@ if [ -z "$1" ]; then
     compress lvl2
     compress lvl3
     compress lvl4
-
-    cd data
-    mcs fxdecode.cs
-    mcs ayfxbanksplit.cs
-    mono ayfxbanksplit.exe biggoil-mod.afb
-    mono fxdecode.exe 3.afx
-    mono fxdecode.exe 4.afx
-    mono fxdecode.exe 7.afx
-    mono fxdecode.exe 12.afx
-    mono fxdecode.exe 13.afx
-    mono fxdecode.exe 14.afx
-    mono fxdecode.exe 17.afx
-    mono fxdecode.exe 10.afx
-    rm *.afx
-    cd ..
 fi
 
-brass -s bote.asm bote.com -l bote.html
+brass -s biggoil.asm biggoil.com -l bote.html
+cp biggoil.com ../mame/bo

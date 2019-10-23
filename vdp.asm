@@ -251,6 +251,7 @@ waitFrames:
     call    waitVSync
     djnz    waitFrames
 
+
 waitVSync:
     in      a,(VDP_STAT)        ; poll VDP's status register for the vblank bit (7). reading it clears it.
     rla
@@ -260,6 +261,17 @@ waitVSync:
     inc     a
     ld      (frames),a
 
+    exx
 irqsnd = $+1
-    call    $+3
+    call    _dummy              ; call whichever sound update function is installed
+    exx
+
+    ld      a,7                 ; set bit 6 of register 7
+    out     (PSG_SEL),a         ; this is to ensure the continued working
+    in      a,(PSG_SEL)         ; of the keyboard on the einstein
+    or      $40
+    out     (PSG_WR),a
+
+_dummy:
     ret
+

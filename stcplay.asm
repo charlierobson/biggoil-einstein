@@ -14,18 +14,6 @@
 ;
 
 
-
-; l8003: ;c30980    
-;               jp      initalise
-; l8006: ;c34481    
-;               jp      play_sound                                                              ;this is the call point
-	
-mute_stc:
-	ld	hl,mute_list
-	jp	mute_ay
-	.byte	0,0,0,0,0,0,0,$40,0,0,0,0,0
-mute_list:
-	.byte	0
 	;for intterupt driven
 	;sound every 1/50th second
 
@@ -1026,11 +1014,7 @@ tone_table:
 send_data_to_ay:
 	ld	hl,end_data_to_send_to_ay			;points to end of data to send, env shape working backwards
 
-	ld		a,(ay_reg7)					; EINSTEIN - ensure keyboard remains enabled
-	or		$40
-	ld		(ay_reg7),a
-
-mute_ay:
+ay_writeRegs:
 	xor	a								;zero a
 	or	(hl)							;test env shape
 	ld	a,0dh							;load a with 13, will loop 14 times
@@ -1045,13 +1029,42 @@ mute_ay:
 	dec	hl							; skip 3 bytes in data
 	
 send_ay_data:
-	ld	   c,PSG_SEL
-	out		(c),a
-	ld	   c,PSG_WR
-	outd
-	dec		a
-	jp		p,send_ay_data
-	ret
+l842d: ;0efd	  
+;               ld      c,$fd                                                   ;low byte port address (spectrum)
+										;register select
+	
+	ld	   b,$ff							;high byte port address (zx81)
+										;register select
+ay_write_loop:
+l842f: ;06ff	  
+;               ld      b,$ff                                                   ;high byte port address (spectrum)
+										;register select
+					
+	ld	   c,PSG_SEL							;low byte port address (zx81)
+										;register select
+										;needed to swap order as its inside a loop
+     
+	out	(c),a							;select the register to write to
+      
+;               ld      b,$bf                                                   ;high byte port address (spectrum)
+										;data port
+	
+	ld	   c,PSG_WR							;low byte port adreess (zx81)
+	outd									;output contents of (hl) to port (bc)
+										;and decrement hl
+	dec	a								;decrement register selector / counter
+	jp	p,ay_write_loop 					;if not minus (has not rolled round to $ff, then go round again      
+	ret									;done for now
+
+	
 
 
+
+mute_ay:
+	ld		hl,mute_list
+	jp		ay_writeRegs
+
+	.byte	0,0,0,0,0,0,0,0,0,0,0,0,0
+mute_list:
+	.byte	0
 

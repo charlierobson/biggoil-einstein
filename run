@@ -1,6 +1,0 @@
-#!/bin/bash 
-
-./build noscreens
-cd ../mame
-./mame64 m5p -cart1 ../bom5/bom5.rom $1 &
-cd ../bom5

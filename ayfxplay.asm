@@ -24,8 +24,6 @@
 ;                                                              ;
 ;--------------------------------------------------------------;
 
-.module AYFX
-
 
 ; channel descriptors, 4 bytes per channel:
 ; +0 (2) current address (the channel is free if the high byte =$00)
@@ -34,6 +32,7 @@
 
 afxChDesc	.fill 3*4
 
+.module AYFX
 
 
 
@@ -62,22 +61,20 @@ afxInit0
 	inc		hl
 	djnz		afxInit0
 
-	ld		e,14 ; dont touch regs 14 & 15
-	ld		hl,_initdata
+	ld		hl,PSG_SEL*256+PSG_WR	;initialize AY
+	ld		e,15
 afxInit1
 	dec		e
-	ld		c,PSG_SEL
+	ld		c,h
 	out		(c),e
-	ld		c,PSG_WR
-	outi
+	ld		c,l
+	out		(c),d
 	jr		nz,afxInit1
 
-	ld		de,$4000
 	ld		(afxNseMix+1),de		;reset the player variables
 	ret
 
-_initdata: ; regs 13..0
-	.db		0,0,0,0,0,0,$40,0,0,0,0,0,0,0
+
 
 ;--------------------------------------------------------------;
 ; Playing the current frame.                                   ;
@@ -99,7 +96,7 @@ afxFrame0
 	
 	ld		e,(hl)					;we take the value of the information byte
 	inc		hl
-
+		
 	sub		b						;select the volume register:
 	ld		d,b						;(11-3=8, 11-2=9, 11-1=10)
 
@@ -145,7 +142,6 @@ afxFrame1
 	
 afxFrame2
 	inc		hl
-	or		$40
 	ld		(afxNseMix+1),a			;keep the noise value
 	
 afxFrame3
@@ -185,17 +181,18 @@ afxFrame7
 	pop		bc
 	djnz		afxFrame0
 
+	ld		hl,PSG_SEL*256+PSG_WR	;output the value of noise and mixer
 afxNseMix
-	ld		de,$4000					;+1 (E) = noise, +2 (D) = mixer, $40 b/c keyboard
+	ld		de,0					;+1 (E) = noise, +2 (D) = mixer
 	ld		a,6
-	ld		c,PSG_SEL
+	ld		c,h
 	out		(c),a
-	ld		c,PSG_WR
+	ld		c,l
 	out		(c),e
 	inc		a
-	ld		c,PSG_SEL
+	ld		c,h
 	out		(c),a
-	ld		c,PSG_WR
+	ld		c,l
 	out		(c),d
 
 	ret
