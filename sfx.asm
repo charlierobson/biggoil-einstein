@@ -2,19 +2,27 @@
 ;
 .module SFX
 
-
+;
+; DANGER WILL ROBINSON!
+;
+; The effects sound bank is modified at run time.
+;
+; effect 18 is dynamically generated in order to make the retract
+; sound's increasing pitsh. this data below is changed each frame
+; then written back into the effect bank by the 'generatetone'
+; function.
+;
+; if the effects mank is changed be sure to either lock effect 18
+; in place or make appropriate modifications to the code.
+;
 newtone:
 newtonep1=newtone+1
-newtonep2=newtone+4
-newtonep3=newtone+7
-newtonep4=newtone+10
-	.byte   $80,$09,$3f,$82,$03,$20,$85,$0D,$12,$88,$0B,$0f,$3f
-newtonelen = $-newtone
-	.byte   $80,$09,$3f,$82,$03,$20,$85,$0D,$12,$88,$0B,$0f,$3f
+newtonep2=newtone+5
+newtonep3=newtone+8
+newtonep4=newtone+11
+	.byte   $EF,$F9,$03,$00,$AD,$03,$02,$AA,$2D,$01,$A7,$FB,$00,$D0,$20
+	.byte   $EF,$F9,$03,$00,$AD,$03,$02,$AA,$2D,$01,$A7,$FB,$00,$D0,$20
 
-drone1:
-    .byte       %10101100
-    .byte       $0f,$3f
 
 
 initsfx:
@@ -99,7 +107,7 @@ generatetone:
 	ld		de,newtone
 	ex		de,hl
 	ld		bc,15
-	ldir
+	ldir							; overwrite the tone in the bank with the modified one
 	pop		af
 	jp		AYFX.PLAY
 

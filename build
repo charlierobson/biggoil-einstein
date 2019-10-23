@@ -20,6 +20,7 @@ fi
 # so there's no need to build them unless changed.
 #
 # if building on PC all you need is the following line:
+#
 brass -s biggoil.asm biggoil.com -l bote.html
 
 cp biggoil.com ../mame/bo
