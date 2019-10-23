@@ -16,6 +16,9 @@ title:
 end:
 	.incbin data/end.binlz
 
+help:
+	.incbin data/instructions.binlz
+
 soundbank:
 	.incbin data/biggoil.afb
 
@@ -97,6 +100,7 @@ offscreenmap = $7400		;	dfile + $400
 	.var	byte, tcd
 	.var	byte, tt
 	.var	byte, frames
+	.var	word, wframes
 	.var	byte, winchframe
 	.var	word, playerpos
 	.var	word, oldplayerpos

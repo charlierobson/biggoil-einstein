@@ -32,6 +32,7 @@ clrirq:
 #include "charmap.asm"
 
 #include "titlescrn.asm"
+#include "helpscrn.asm"
 #include "redefine.asm"
 #include "game.asm"
 #include "gameoverscrn.asm"

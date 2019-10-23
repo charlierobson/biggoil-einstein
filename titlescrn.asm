@@ -3,42 +3,53 @@
 .module TSC
 
 _tt1:
-	.asc	"press fire"
+	.asc	"space to start"
 _tt2:
-	.asc	"r:redefine"
+	.asc	"r:redefine key"
+_tt3:
+	.asc	"i:instructions"
+
+	.align	8
+_ttbl:
+	.dw		_tt1,_tt2,_tt1,_tt3
+
 
 titlescn:
+	call	init_stc
+
+titlerestart:
 	ld		hl,title
 	ld		de,dfile
 	call	decrunch
 	call	displayscoreonts
 	call	displayhionts
 
-	call	init_stc
-
 _titleloop:
 	call	framesync
 
 	ld		a,(frames)
-	and		127
-	jr		nz,_nochangetext
+	rlca
+	rlca
+	and		3
+	add		a,a
+	ld		hl,_ttbl
+	or		l
+	ld		l,a
+	ld		a,(hl)
+	inc		hl
+	ld		h,(hl)
+	ld		l,a
 
-	ld		hl,_tt1
-	ld		a,(frames)
-	and		128
-	jr		nz,{+}
-	ld		hl,_tt2
-+:  ld		de,dfile+$303
-	ld		bc,10
+	ld		de,dfile+$301
+	ld		bc,14
 	ldir
 
-_nochangetext:
 	ld		  a,(frames)
 	and		 15
 	jr		  nz,_noflash
 
-	ld		  hl,dfile+$303
-	ld		  b,10
+	ld		  hl,dfile+$301
+	ld		  b,14
 _ilop:
 	ld		  a,(hl)
 	xor		 $80
@@ -49,7 +60,15 @@ _ilop:
 _noflash:
 	call	readtitleinput
 
-	ld		a,(redef)
+	ld		a,(insts)
+	and		3
+	cp		1
+	jr		nz,{+}
+
+	call	helpscn
+	jp		titlerestart
+
++:	ld		a,(redef)
 	and		3
 	cp		1
 	jr		nz,{+}

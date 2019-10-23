@@ -7,6 +7,7 @@ function compress {
 }
 
 if [ -z "$1" ]; then
+    compress instructions
     compress title
     compress end
     compress lvl1

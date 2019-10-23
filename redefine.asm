@@ -4,7 +4,7 @@
 
 	.align  64
 _keychar:
-	.db	    7,6,8+0,8+7,3,2,1,0
+	.db	    7,6,8+0,8+7,3,2,1,0 ; should really be > 128
 	.asc	"IOP?_?|0"
 	.asc	"KL;:??9",8+5
 	.asc	",./8?=?",8+4
@@ -32,28 +32,34 @@ _k7:
 _bit2bytetbl:
 	.byte	128,64,32,16,8,4,2,1
 
+
 _pkf:
 	.asc	"press key for:",$ff
+
 _upk:
     .dw     up-3                ; -3 because UP points at last byte of 4 byte structure
     .dw     $0a04
 	.asc	"up:    ",$ff
+
 _dnk:
     .dw     down-3
     .dw     $0a06
 	.asc	"down:  ",$ff
+
 _lfk:
     .dw     left-3
     .dw     $0a08
 	.asc	"left:  ",$ff
+
 _rtk:
     .dw     right-3
     .dw     $0a0a
 	.asc	"right: ",$ff
+
 _frk:
     .dw     fire-3
     .dw     $0a0c
-	.asc	"fire:  ",$ff
+	.asc	"retract: ",$ff
 
 
 
@@ -202,6 +208,68 @@ _bit2byte:
     ret                             ; P set if key bit wasn't found (2 keys at once?)
 
 
+
+
+_keytobuf:
+	ld		a,(keyrow)
+	call	_bit2byte
+	ld		a,c
+	add		a,a
+	add		a,a
+	add		a,a
+	ld		hl,_keychar
+	add		a,l
+    ld      l,a
+
+	push	hl
+    ld      a,(keycol)
+	call	_bit2byte
+	pop		hl
+	ld		a,c
+	add		a,l
+	ld		l,a
+
+	ld		a,(hl)                      ; is it a char or a string?
+	cp		8
+	jr		c,_itsastringk
+
+	cp		16
+	jr		nc,_itsachark
+
+	; it's an F key
+	push	af
+	ld		a,43	; "F"
+    ld		(de),a
+	inc		de
+	pop		af
+	add		a,$14
+
+_itsachark:
+    ld		(de),a
+	inc		de
+	ret
+
+    ; it's a string
+_itsastringk:
+  	ld		hl,_kcs
+	add		a,a
+	add		a,l
+	ld		l,a
+	ld		a,(hl)
+	inc		hl
+	ld		h,(hl)
+	ld		l,a
+    jr      {+}
+
+-:	ld		(de),a
+	inc		de
++:	ld		a,(hl)
+    inc     hl
+	cp		$ff
+	jr		nz,{-}
+	ret
+
+; TODO - refactor these 2 fns
 
 _showkey:
 	ld		hl,_keychar

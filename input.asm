@@ -13,8 +13,9 @@
 ; trigger impulse
 
 titleinputstates:
-	.byte	$01,%01000000,%00000000,0		; startgame	(SP)
-	.byte	$20,%00001000,%00000000,0		; redefine	(R)
+	.byte	$01,%01000000,%00000000,0		; startgame    (SP)
+	.byte	$20,%00001000,%00000000,0		; redefine     (R)
+	.byte	$02,%00000001,%00000000,0		; instructions (I)
 	.byte	$00,%00000000,%00000000,0		; jsbegin	(--)
 
 gameinputstates:
@@ -29,7 +30,8 @@ gameinputstates:
 ;
 begin	= titleinputstates + 3
 redef	= titleinputstates + 7
-jsbegin	= titleinputstates + 11
+insts	= titleinputstates + 11
+jsbegin	= titleinputstates + 15
 
 fire	= gameinputstates + 3
 up		= gameinputstates + 7
@@ -40,15 +42,16 @@ jsfire	= gameinputstates + 23
 
 
 prepTitleInputs:
+	ld		b,3
 	ld		hl,titleinputstates+3
 	jr		_prepinputs
 
 prepGameInputs:
+	ld		b,6
 	ld		hl,gameinputstates+3
 
 _prepinputs:
 	ld		de,4
-	ld		b,5
 
 -:	ld		(hl),$ff
 	add		hl,de
@@ -63,7 +66,8 @@ _prepinputs:
 readtitleinput:
 	ld		hl,titleinputstates
 	call	updateinputstate ; (begin)
-	jp		updateinputstate ; (redefine)
+	call	updateinputstate ; (redefine)
+	jp		updateinputstate ; (instructs)
 
 
 readinput:

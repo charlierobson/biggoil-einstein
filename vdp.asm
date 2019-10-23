@@ -261,6 +261,10 @@ waitVSync:
     inc     a
     ld      (frames),a
 
+    ld      hl,(wframes)
+    inc     hl
+    ld      (wframes),hl
+
     exx
 irqsnd = $+1
     call    _dummy              ; call whichever sound update function is installed
