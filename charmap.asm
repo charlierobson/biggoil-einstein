@@ -23,7 +23,7 @@
     .asciimap '^','^',$43
     .asciimap '_','_',$44
     .asciimap '!','!',$45
-    .asciimap $2c,$2c,$46   ; single quote
+    .asciimap $60,$60,$46   ; backtick -> single quote
     .asciimap '@','@',$60
     
     .asciimap '0','9',{*}-'0'+$1c

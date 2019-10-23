@@ -4,7 +4,9 @@ BiggOil for Tatung Einstein
 ### TODO
 * ~~non-matrix keys~~
 * ~~redefinition module~~
-
+* bugs
+  * ~~' character~~
+  * fkey in the key map
 * joystick
 * sfx
 * music

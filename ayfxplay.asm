@@ -88,7 +88,7 @@ FRAME:
 afxFrame0
 	push		bc
 
-	ld		a,11
+	ld		a,11  ; cheesy test, uses the MSB of the sound data file
 	ld		h,(iy+1)				;the comparison of the high-order byte of the address to <11
 	cp		h
 	jr		nc,afxFrame7			;the channel does not play, we skip
@@ -96,7 +96,7 @@ afxFrame0
 	
 	ld		e,(hl)					;we take the value of the information byte
 	inc		hl
-		
+
 	sub		b						;select the volume register:
 	ld		d,b						;(11-3=8, 11-2=9, 11-1=10)
 
@@ -127,19 +127,20 @@ afxFrame0
 	inc		hl
 	ld		c,PSG_WR
 	out		(c),d
-	
+
 afxFrame1
 	bit		6,e						;will change the noise?
 	jr		z,afxFrame3				;noise does not change
-	
+
 	ld		a,(hl)					;read the meaning of noise
 	sub		$20
-	jr		c,afxFrame2				;less than $ 20, play on
-	ld		h,a						;otherwise the end of the effect
+	jr		c,afxFrame2				;less than $ 20, play on ; WHAT IS MEANING OF >$20?
+
+	ld		h,a						;otherwise the end of the effect - a=0
 	ld		b,$ff ; bug?
 	ld		b,c						;in BC we record the longest time
 	jr		afxFrame6
-	
+
 afxFrame2
 	inc		hl
 	ld		(afxNseMix+1),a			;keep the noise value
@@ -224,7 +225,6 @@ afxBnkAdr
 	push	hl						;save the effect address on the stack
 	
 	ld		hl,afxChDesc			;empty channel search
-;	ld		b,3
 	ld		b,2						; search 2 channels - force the third
 afxPlay0
 	inc		hl

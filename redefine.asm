@@ -4,14 +4,14 @@
 
 	.align  64
 _keychar:
-	.db	    7,6,8+0,8+7,3,2,1,0 ; should really be > 128
+	.db	    $87,$86,$C0,$C7,$83,$82,$81,$80
 	.asc	"IOP?_?|0"
-	.asc	"KL;:??9",8+5
-	.asc	",./8?=?",8+4
-	.asc	"7654321",8+3
-	.asc	"UYTREWQ",8+2
-	.asc	"JHGFDSA",8+1
-	.asc	"MNBVCXZ",8+6
+	.asc	"KL;:??9",$C5
+	.asc	",./8?=?",$C4
+	.asc	"7654321",$C3
+	.asc	"UYTREWQ",$C2
+	.asc	"JHGFDSA",$C1
+	.asc	"MNBVCXZ",$C6
 
 _kcs:
 	.word	_k0,_k1,_k2,_k3,0,0,0,_k7
@@ -39,17 +39,17 @@ _pkf:
 _upk:
     .dw     up-3                ; -3 because UP points at last byte of 4 byte structure
     .dw     $0a04
-	.asc	"up:    ",$ff
+	.asc	"up: ",$ff
 
 _dnk:
     .dw     down-3
     .dw     $0a06
-	.asc	"down:  ",$ff
+	.asc	"down: ",$ff
 
 _lfk:
     .dw     left-3
     .dw     $0a08
-	.asc	"left:  ",$ff
+	.asc	"left: ",$ff
 
 _rtk:
     .dw     right-3
@@ -64,16 +64,11 @@ _frk:
 
 
 redefinekeys:
-	; call	initsfx
-
     call    cls
 
 	ld		hl,_pkf
 	ld		de,$0802
 	call	textOut
-
-	; ld		a,3
-	; call	AYFX.PLAY
 
 -:	call	waitVSync
 	call	_getcolbit			; wait for key release
@@ -131,10 +126,7 @@ _redefloop:
     ld      a,c                     ; store the bit number for the key
     ld      (keycol),a
 
-	; ld		a,4
-	; call	AYFX.PLAY
-
-    call    _showkey
+    call    _keytoscreen
 
 _redefnokey:
 	call	waitVSync
@@ -201,13 +193,6 @@ _dbnope:
 	ret
 
 
-testit:
-    ld      a,128
-    call    _bit2byte
-    ld      a,1
-    call    _bit2byte
-    ld      a,3
-
 _bit2byte:
 	ld		hl,_bit2bytetbl
 	ld		bc,8
@@ -218,67 +203,18 @@ _bit2byte:
 
 
 _keytobuf:
-	ld		a,(keyrow)
-	call	_bit2byte
-	ld		a,c
-	add		a,a
-	add		a,a
-	add		a,a
-	ld		hl,_keychar
-	add		a,l
-    ld      l,a
+	ld		hl,memoutputter
+	ld		(outputter+1),hl
+	jr		_keyoutman
 
-	push	hl
-    ld      a,(keycol)
-	call	_bit2byte
-	pop		hl
-	ld		a,c
-	add		a,l
-	ld		l,a
 
-	ld		a,(hl)                      ; is it a char or a string?
-	cp		8
-	jr		c,_itsastringk
+_keytoscreen:
+	ld		hl,vdpoutputter
+	ld		(outputter+1),hl
 
-	cp		16
-	jr		nc,_itsachark
+	; fall into
 
-	; it's an F key
-	push	af
-	ld		a,43	; "F"
-    ld		(de),a
-	inc		de
-	pop		af
-	add		a,$14
-
-_itsachark:
-    ld		(de),a
-	inc		de
-	ret
-
-    ; it's a string
-_itsastringk:
-  	ld		hl,_kcs
-	add		a,a
-	add		a,l
-	ld		l,a
-	ld		a,(hl)
-	inc		hl
-	ld		h,(hl)
-	ld		l,a
-    jr      {+}
-
--:	ld		(de),a
-	inc		de
-+:	ld		a,(hl)
-    inc     hl
-	cp		$ff
-	jr		nz,{-}
-	ret
-
-; TODO - refactor these 2 fns
-
-_showkey:
+_keyoutman:
 	ld		hl,_keychar
 	ld		a,(keyrow)
 	add		a,a
@@ -292,22 +228,26 @@ _showkey:
 	ld		l,a
 
 	ld		a,(hl)                      ; is it a char or a string?
-	cp		8
-	jr		c,_itsastring
+	bit		7,a
+	jr		z,_itsachar
 
-	cp		16
-	jr		nc,_itsachar
+	and		127
+	bit		6,a
+	jr		z,_itsastring
 
 	; it's an F key
+	and		63
 	push	af
 	ld		a,43	; "F"
-    out     (VDP_DATA),a
+	call	outputter
 	pop		af
-	add		a,$14
+	add		a,$1c
 
 _itsachar:
-    out     (VDP_DATA),a
-	ret
+	; fall into outputter
+
+outputter:
+	jp		0
 
     ; it's a string
 _itsastring:
@@ -321,9 +261,19 @@ _itsastring:
 	ld		l,a
     jr      {+}
 
--:	out     (VDP_DATA),a
+-:	call	outputter
 +:	ld		a,(hl)
     inc     hl
 	cp		$ff
 	jr		nz,{-}
+	ret
+
+
+vdpoutputter:
+    out     (VDP_DATA),a
+	ret
+
+memoutputter:
+    ld		(de),a
+	inc		de
 	ret

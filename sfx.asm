@@ -43,6 +43,14 @@ longplay:
 	jp		AYFX.PLAYON3
 
 
+waitForCh3:
+	call	waitVSync
+	ld		a,(afxChDesc+9)	; ch 3 sound data ptr, will be 0 when done
+	and		a
+	jr		nz,waitForCh3
+	ret
+
+
 initdrone:
 	ld		a,(level)				; level is 0..7 incl
 	rlca

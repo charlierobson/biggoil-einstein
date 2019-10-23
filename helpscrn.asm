@@ -12,12 +12,19 @@ renderKey:
 	inc		hl
 	ld		b,(hl)
 	inc 	hl
+	push	hl
 	ld		a,(bc)	; get pointer to key row/col val
-	ld		(keyrow),a
+	push	af
 	inc		bc
 	ld		a,(bc)
+    call    REDEF._bit2byte
+	ld		a,c
 	ld		(keycol),a
-
+	pop		af
+    call    REDEF._bit2byte
+	ld		a,c
+	ld		(keyrow),a
+	pop		hl
 	inc		hl
 	inc		hl
 
@@ -92,7 +99,6 @@ _helploop:
 	ld		de,dfile+$2FE
 	ld		bc,20
 	ldir
-
 
 	call	readtitleinput
 

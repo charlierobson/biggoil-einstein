@@ -86,9 +86,6 @@ mainloop:
 _die:
 	call	loselife
 	jp		nz,restart
-
-	ld		b,100
-	call	waitFrames
     ret
 
 _playon:
@@ -254,4 +251,9 @@ tidyup:
 	ld		a,(retractptr)
 	and		a
 	jr		nz,{-}
-	ret
+
+	call	framesync
+	call	retract
+	call	retract
+	call	framesync
+	jp		waitForCh3
