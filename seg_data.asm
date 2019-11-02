@@ -16,6 +16,9 @@ title:
 end:
 	.incbin data/end.binlz
 
+redefi:
+	.incbin data/redef.binlz
+
 help:
 	.incbin data/instructions.binlz
 
@@ -82,6 +85,41 @@ clouds:
 	.byte	$00, $0a, $08, $09, $00, $00, $00, $00, $00, $00, $00, $0a, $0a, $09, $09, $00, $00, $00, $08, $08, $0a, $00, $00, $00, $00, $00, $00, $09, $08, $08, $0a, $00
 
 
+; where the variables live
+;
+keycol			.db 0 
+keyrow  		.db 0 
+keyaddress  	.dw 0 
+tcd  			.db 0 
+tt  			.db 0 
+frames  		.db 0 
+soundEnable 	.db 0 
+winchframe  	.db 0 
+playerpos  		.dw 0 
+oldplayerpos	.dw 0 
+playerhit  		.db 0 
+playerdirn  	.dw 0 
+retractptr  	.dw 0 
+timerv  		.db 0 
+scoretoadd  	.db 0 
+score  			.dw 0 
+hiscore  		.dw 0 
+lives  			.db 0 
+entrancecount	.db 0 
+level  			.db 0 
+timeout  		.db 0 
+cldfrm  		.db 0 
+generatimer 	.db 0 
+leveltrig  		.db 0 
+lx  			.db 0 
+rndseed  		.dw 0 
+psound  		.dw 0 
+headchar  		.db 0 
+fuelchar  		.db 0 
+afxNoise  		.db 0 
+enemydata		.ds ENEMYSIZE*NENEMIES
+
+
 
 ; dfile is mirrored at +$400 bytes further on in memory,
 ; this is to allow quick indexing into the map by setting
@@ -90,42 +128,6 @@ clouds:
 dfile = $7000
 offscreenmap = $7400		;	dfile + $400
 
-; where the variables live
-;
-.varloc $7800,$100
-	.var	byte, lastJ
-	.var	byte, keycol
-	.var	byte, keyrow
-	.var	word, keyaddress
-	.var	byte, tcd
-	.var	byte, tt
-	.var	byte, frames
-	.var	byte, winchframe
-	.var	word, playerpos
-	.var	word, oldplayerpos
-	.var	byte, playerhit
-	.var	word, playerdirn
-	.var	word, retractptr
-	.var	byte, timerv
-	.var	byte, scoretoadd
-	.var	word, score
-	.var	word, hiscore
-	.var	byte, lives
-	.var	byte, entrancecount
-	.var	byte, level
-	.var	byte, timeout
-	.var	byte, cldfrm
-	.var	byte, generatimer
-	.var	byte, leveltrig
-	.var	byte, lx
-	.var	word, rndseed
-	.var	word, psound
-	.var	byte, headchar
-	.var	byte, fuelchar
-	.var	byte, droneframe
-	.var	byte, dronerate
-	.var	byte, afxNoise
-	.var	byte[ENEMYSIZE*NENEMIES], enemydata
 
 ; retractqueue code requires a 'backstop' - the byte at retractqueue-1 is used.
 ;

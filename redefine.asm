@@ -4,7 +4,7 @@
 
 	.align  64
 _keychar:
-	.db	    $84,0,$C0,$C7,$83,$82,$81,$80
+	.db		$84,0,$C0,$C7,$83,$82,$81,$80
 	.asc	"IOP"
 	.db		$85
 	.asc	"_"
@@ -66,27 +66,27 @@ _pkf:
 	.asc	"press key for:",$ff
 
 _upk:
-    .dw     up-3                ; -3 because UP points at last byte of 4 byte structure
-    .dw     $0a04
+	.dw		up-2			; -3 because UP points at last byte of 4 byte structure
+	.dw		$0a04
 	.asc	"up: ",$ff
 
 _dnk:
-    .dw     down-3
-    .dw     $0a06
+	.dw		down-2
+	.dw		$0a06
 	.asc	"down: ",$ff
 
 _lfk:
-    .dw     left-3
+    .dw     left-2
     .dw     $0a08
 	.asc	"left: ",$ff
 
 _rtk:
-    .dw     right-3
+    .dw     right-2
     .dw     $0a0a
 	.asc	"right: ",$ff
 
 _frk:
-    .dw     fire-3
+    .dw     fire-2
     .dw     $0a0c
 	.asc	"retract: ",$ff
 
@@ -126,34 +126,34 @@ _redeffit:
 	inc		hl
 	ld		(keyaddress),de		; the input data we're altering
 
-	ld		e,(hl)
+	ld		e,(hl)				; screen position into de
 	inc		hl
 	ld		d,(hl)
 	inc		hl
-	call	textOut
+
+	call	textOut				; text at hl -> screen
 
 _redefloop:
 	call	waitVSync
 	call	_getcolbitDebounced
 	jr		z,_redefloop
 
+	; when we return from getting the column bit l = column index, a = bit mask
+
+	ex		de,hl
 	ld		hl,(keyaddress)
-	ld		(hl),c                  ; stash IO port address
+	ld		(hl),e                  ; stash row
 	inc		hl
-	ld		(hl),a                  ; stash bit mask
+	ld		(hl),a                  ; stash col mask
 
-	push	af
-	ld		a,c
-	call	_bit2byte
-	ld		a,c
-    ld      (keyrow),a
-	pop		af
-
-    call    _bit2byte                ; if the bit pattern is invalid then try again
-    jr      nz,_redefloop
+    call    _bit2byte               ; col mask -> bit number (64 -> 6,  1 -> 0 etc)
+    jr      nz,_redefloop	        ; if not exactly 1 bit set then the bit pattern is invalid, try again
 
     ld      a,c                     ; store the bit number for the key
     ld      (keycol),a
+
+	ld		a,e                     ; column number
+    ld      (keyrow),a
 
     call    _keytoscreen
 
@@ -166,53 +166,31 @@ _redefnokey:
 
 
 _getcolbit:
-	ld		bc,$0801				; b is loop count, c is row selector bit
+	ld		b,$08			; b is loop count, c is row selector bit
+	ld		hl,keystates
 
--:	call	readKeyRow				; byte will have a 1 bit if a key is pressed
+-:	ld		a,(hl)
+	and		a
 	ret		nz
-	sla		c
+
+	inc		hl
 	djnz	{-}
 
     and     a
 	ret
 
 
-readKeyRow:
-    LD		A,0EH
-	OUT		(PSG_SEL),A
-	ld		a,c						; get key row selector
-	CPL								; make it active low
-	OUT		(PSG_WR),A
-	LD		A,0FH					; read key row
-	OUT		(PSG_SEL),A
-	IN		A,(PSG_RD)
-	CPL								; active low->hi
-	and		a
-	ret
-
-
 _getcolbitDebounced:
-	ld		bc,$0801				; b is loop count, c is row
+	call	_getcolbit
+	ret		z
 
--:	call	readKeyRow				; A will be nonzero if a key is pressed
-	jr		nz,_dbit
-
-	sla		c						; next row
-	djnz	{-}
-  	and     a
-	ret
-
-_dbit:
-	ld		b,a						; stash the bit we're looking for
-	ld		l,4						; start a timer
+	ld		b,4						; timer
 
 -:	call	waitVSync
-	call	readKeyRow
-	cp		b
+	cp		(hl)
 	jr		nz,_dbnope				; nope, released too soon or glitchy
 
-	dec		l
-	jr		nz,{-}
+	djnz	{-}
 
 	and		a						; we hit required time so ok
 	ret
@@ -223,10 +201,12 @@ _dbnope:
 
 
 _bit2byte:
+	push	hl
 	ld		hl,_bit2bytetbl
 	ld		bc,8
 	cpir
-    ret                             ; P set if key bit wasn't found (2 keys at once?)
+	pop		hl
+    ret                             ; P set if key bit wasn't found (moer than one bit set)
 
 
 

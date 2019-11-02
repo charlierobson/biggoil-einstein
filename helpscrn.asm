@@ -8,39 +8,33 @@ kctobuf:
 renderKey:
 	push	de
 
-	ld		c,(hl)
+	ld		c,(hl)				; get pointer to input state
 	inc		hl
 	ld		b,(hl)
 	inc 	hl
-	push	hl
-	ld		a,(bc)	; get pointer to key row/col val
-	push	af
+	inc		hl					; skip position info
+	inc		hl
+	ld		a,(bc)				; row num
+	ld		(keyrow),a
 	inc		bc
-	ld		a,(bc)
+	ld		a,(bc)				; col bitmask
     call    REDEF._bit2byte
 	ld		a,c
 	ld		(keycol),a
-	pop		af
-    call    REDEF._bit2byte
-	ld		a,c
-	ld		(keyrow),a
-	pop		hl
-	inc		hl
-	inc		hl
 
--:	ldi				; copy key label to buffer
+-:	ldi							; copy key label to buffer
 	bit		7,(hl)
 	jr		z,{-}
 
-	call	REDEF._keytobuf	; render key name to buffer at de
+	call	REDEF._keytobuf		; render key name to buffer at de
 
 	xor		a
 	ld		b,20
--:	ld		(de),a	; write at 20 spaces after key
+-:	ld		(de),a				; write at 20 spaces after key
 	inc		de
 	djnz	{-}
 
-	pop		de		; advace buffer pointer
+	pop		de					; advace buffer pointer
 	ld		hl,20
 	add		hl,de
 	ex		de,hl
