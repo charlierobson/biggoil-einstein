@@ -67,36 +67,39 @@ _pkf:
 
 _upk:
 	.dw		up-2			; -3 because UP points at last byte of 4 byte structure
-	.dw		$0a04
+	.dw		$0a0b
 	.asc	"up: ",$ff
 
 _dnk:
 	.dw		down-2
-	.dw		$0a06
+	.dw		$0a0d
 	.asc	"down: ",$ff
 
 _lfk:
     .dw     left-2
-    .dw     $0a08
+    .dw     $0a0f
 	.asc	"left: ",$ff
 
 _rtk:
     .dw     right-2
-    .dw     $0a0a
+    .dw     $0a11
 	.asc	"right: ",$ff
 
 _frk:
     .dw     fire-2
-    .dw     $0a0c
+    .dw     $0a13
 	.asc	"retract: ",$ff
 
 
 
 redefinekeys:
-    call    cls
+	ld		hl,redefi
+	ld		de,dfile
+	call	decrunch
+	call	framesync
 
 	ld		hl,_pkf
-	ld		de,$0802
+	ld		de,$0809
 	call	textOut
 
 -:	call	waitVSync
