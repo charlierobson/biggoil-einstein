@@ -2,14 +2,15 @@
 BiggOil for Tatung Einstein
 
 ### TODO
+* some kind of VSYNC
 * ~~non-matrix keys~~
 * ~~redefinition module~~
 * bugs
   * ~~' character~~
-  * fkey in the key map
+  * ~~fkey in the key map~~
 * joystick
-* sfx
-* music
+* ~~sfx~~
+* ~~music~~
 * refactor display code, remove NLs
 * improve graphics somewhat?
 * pipe chars -> contiguous in charset
