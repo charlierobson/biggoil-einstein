@@ -49,7 +49,7 @@ prepGameInputs:
 	ld		hl,fire
 
 _prepinputs:
-	ld		de,4
+	ld		de,3
 
 -:	ld		(hl),$ff
 	add		hl,de
