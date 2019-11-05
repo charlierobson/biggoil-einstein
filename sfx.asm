@@ -26,10 +26,6 @@ newtonep4=newtone+11
 
 
 initsfx:
-	call	framesync
-	call	mute_ay
-	ld		hl,AYFX.FRAME
-	ld		(irqsnd),hl
 	ld		hl,soundbank
 	call	AYFX.INIT
 	ret

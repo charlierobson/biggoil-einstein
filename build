@@ -9,6 +9,7 @@ function compress {
 if [ -z "$1" ]; then
     compress instructions
     compress title
+    compress redef
     compress end
     compress lvl1
     compress lvl2
@@ -22,6 +23,6 @@ fi
 #
 # if building on PC all you need is the following line:
 #
-brass -s biggoil.asm biggoil.com -l bote.html
+brass -s biggoil.asm biggoil.com -l biggoil.html
 
 cp biggoil.com ../mame/bo

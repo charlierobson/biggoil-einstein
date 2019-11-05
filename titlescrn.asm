@@ -3,19 +3,34 @@
 .module TSC
 
 _tt1:
-	.asc	"space to start"
+	.asc	" space to start "
 _tt2:
-	.asc	"r:redefine key"
+	.asc	"r - redefine key"
 _tt3:
-	.asc	"i:instructions"
+	.asc	"i - instructions"
 
 	.align	8
 _ttbl:
 	.dw		_tt1,_tt2,_tt1,_tt3
 
 
+
 titlescn:
-	call	init_stc
+	di
+	call	init_stc			; set up the music player
+	ei
+
+	ld		hl,play_stc
+	ld		(playfn),hl
+
+	call	titlerestart
+
+	ld		hl,mute_ay
+	ld		(playfn),hl
+
+	ret
+
+
 
 titlerestart:
 	ld		hl,title
@@ -26,6 +41,7 @@ titlerestart:
 
 _titleloop:
 	call	framesync
+	call	readtitleinput
 
 	ld		a,(frames)
 	rlca
@@ -40,26 +56,24 @@ _titleloop:
 	ld		h,(hl)
 	ld		l,a
 
-	ld		de,dfile+$301
-	ld		bc,14
+	ld		de,dfile+$300
+	ld		bc,16
 	ldir
 
-	ld		  a,(frames)
-	and		 16
-	jr		  nz,_noflash
+	ld		a,(frames)
+	and		16
+	jr		nz,_noflash
 
-	ld		  hl,dfile+$301
-	ld		  b,14
+	ld		hl,dfile+$300
+	ld		b,16
 _ilop:
-	ld		  a,(hl)
-	xor		 $80
-	ld		  (hl),a
-	inc		 hl
+	ld		a,(hl)
+	xor		$80
+	ld		(hl),a
+	inc		hl
 	djnz	_ilop
 
 _noflash:
-	call	readtitleinput
-
 	ld		a,(insts)
 	and		3
 	cp		1
@@ -79,11 +93,6 @@ _noflash:
 	jp		titlerestart
 
 +:	ld		a,(begin)
-	and		3
-	cp		1
-	ret		z
-
-	ld		a,(jsbegin)
 	and		3
 	cp		1
 	jr		nz,_titleloop

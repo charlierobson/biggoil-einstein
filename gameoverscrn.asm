@@ -3,15 +3,23 @@ gameoverscn:
 	ld		de,dfile
 	call	decrunch
 
-	call	init_stc
+	di
+
+	call	init_stc			; set up the music player
+
+	ld		hl,play_stc
+	ld		(playfn),hl
+
 	ld		a,16
 	ld		(pl_current_position),a
 	call	next_pattern
 
+	ei
+
 	ld		a,150
 	ld		(timeout),a
 
-	call	AYFX.INIT
+;;;;	call	AYFX.INIT
 
 _endloop:
 	call	framesync

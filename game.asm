@@ -1,4 +1,19 @@
 game:
+	di
+	call	initsfx
+	ei
+
+	ld		hl,AYFX.FRAME
+	ld		(playfn),hl
+
+	call	doGame
+
+	ld		hl,mute_ay
+	ld		(playfn),hl
+	ret
+
+
+doGame:
 	xor		a
 	ld		(level),a
 	ld		(score),a
@@ -17,8 +32,6 @@ game:
 	ld		(retractqueue-1),a
 
 	call	displayscoreline
-
-	call	initsfx
 
 newlevel:
 	call	displaylevel
@@ -50,20 +63,11 @@ restart:
 	ld		(playerhit),a
 
 mainloop:
-	ld		a,COL_BLACK
-	call	setborder
-
 	call	framesync
-
-	ld		a,COL_CYAN
-	call	setborder
 
 	call	readinput
 
 	ld		a,(fire)				; if fire button has just been released then reset the retract tone
-	ld		b,a
-	ld		a,(jsfire)
-	or		b
 	and		3
 	cp		2
 	call	z,resettone
@@ -93,9 +97,6 @@ _playon:
 	ld		(psound),hl
 
 	ld		a,(fire)				; retract happens quickly so check every frame
-	ld		b,a
-	ld		a,(jsfire)
-	or		b
 	and		1
 	jr		z,_noretract
 
@@ -216,7 +217,7 @@ loselife:
 	cp		1
 	jr		nz,{+}
 
-	ld		a,13
+	ld		a,13			; game over sound
 	call	AYFX.PLAYON3
 
 +:	call	tidyup

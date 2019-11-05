@@ -18,10 +18,6 @@
 	;sound every 1/50th second
 
 init_stc:
-	call	framesync
-	call	mute_ay
-    ld      hl,play_stc
-    ld      (irqsnd),hl
 	ld      hl,titlestc
 
 ;stc_stuff
@@ -1061,10 +1057,12 @@ l842f: ;06ff
 
 
 mute_ay:
-	ld		hl,mute_list
-	jp		ay_writeRegs
+	ld		bc,$0d00
 
-	.byte	0,0,0,0,0,0,0,0,0,0,0,0,0
-mute_list:
-	.byte	0
-
+-:	ld		a,c
+	inc		c
+	out		(PSG_SEL),a
+	ld		a,0
+	out		(PSG_WR),a
+	djnz	{-}
+	ret

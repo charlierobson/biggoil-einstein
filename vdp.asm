@@ -93,17 +93,21 @@ initVDP:  ;  set graphic 1 mode, bg col, vram layout.
 
 
 displayOff:
+    di
     ld      a,$80
     out     (VDP_REG),a
     ld      a,$81
     out     (VDP_REG),a
+    ei
     ret
 
 displayOn:
+    di
     ld      a,$e0
     out     (VDP_REG),a
     ld      a,$81
     out     (VDP_REG),a
+    ei
     ret
 
 
@@ -129,12 +133,14 @@ graphic1data:
 ;  HL     .equ address
 ;
 setVDPAddress:
+    di
     ld      a,l
     out     (VDP_REG),a
     ld      a,h
     and     $3F
     or      $40
     out     (VDP_REG),a
+    ei
     ret
 
 
@@ -143,11 +149,13 @@ setVDPAddress:
 ;  HL     .equ address
 ;
 writeVDP:
+    di
     ld      a,c
     out     (VDP_REG),a
     ld      a,b
     or      $80
     out     (VDP_REG),a
+    ei
     ret
 
 
@@ -217,28 +225,27 @@ textOutN:
 framesync:
     call    waitVSync
 
-    ld      a,COL_DRED
-    call    setborder
-
     ld      hl,NAMETBL
     call    setVDPAddress
     ld      hl,dfile+1
     ld      b,24
 
--:  ld      e,b
+-:  di
+    ld      e,b
     ld      bc,$2000+VDP_DATA
     otir
     inc     hl
     ld      b,e
+    ei
     djnz    {-}
-
-    ld      a,COL_BLACK
 
     ; fall in to ..
 
-setborder:
    ret ; comment/uncomment to disable the border timing bars
 
+    ld      a,COL_DRED
+
+setborder:
 	out		(VDP_REG),a
 	ld		a,$87
 	out		(VDP_REG),a
@@ -253,27 +260,11 @@ waitFrames:
 
 
 waitVSync:
-    exx
+    push    af
 
 -:  in      a,(VDP_STAT)        ; poll VDP's status register for the vblank bit (7). reading it clears it.
     rla
     jr      nc,{-}
 
-    ld      hl,(frames)
-    inc     hl
-    ld      (frames),hl
-
-irqsnd = $+1
-    call    _dummy              ; call whichever sound update function is installed
-
-    ld      a,7                 ; set bit 6 of register 7
-    out     (PSG_SEL),a         ; this is to ensure the continued working
-    in      a,(PSG_SEL)         ; of the keyboard on the einstein
-    or      $40
-    out     (PSG_WR),a
-
-    exx
-
-_dummy:
+    pop     af
     ret
-
