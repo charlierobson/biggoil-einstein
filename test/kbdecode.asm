@@ -38,9 +38,11 @@ LF=10
     call    row
     sla     e
     call    row
+    in      a,($20)
+    call    showbin
 
     .db     $cf,$cf
-    .db     11,11,11,11,11,11,11,11+$80
+    .db     11,11,11,11,11,11,11,11,11+$80
 
     jr      {-}
 
@@ -56,6 +58,7 @@ row:
 	IN	A,(PSG_RD)
 	CPL
 
+showbin:
     ld      b,8
 -:
     push    bc
